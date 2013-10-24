@@ -7,6 +7,7 @@ var templateNode = require('tmpl!./message_list.html'),
     deleteConfirmMsgNode = require('tmpl!./msg/delete_confirm.html'),
     largeMsgConfirmMsgNode = require('tmpl!./msg/large_message_confirm.html'),
     common = require('mail_common'),
+    evt = require('evt'),
     model = require('model'),
     headerCursor = require('header_cursor').cursor,
     htmlCache = require('html_cache'),
@@ -1197,6 +1198,29 @@ MessageListCard.prototype = {
       starNode.classList.remove('msg-header-star-starred');
   },
 
+  emitIfInbox: function(folder) {
+    var account = model.account,
+        foldersSlice = model.foldersSlice;
+
+    if (account && foldersSlice) {
+      var inboxFolder = foldersSlice.getFirstFolderWithType('inbox');
+      if (inboxFolder === folder) {
+        evt.emit('inboxShown', account.id);
+      }
+    }
+  },
+
+  /**
+   * Called when the page visibility changes.
+   */
+  onPageVisibilityChange: function(isHidden) {
+    var curFolder = this.curFolder;
+
+    if (!isHidden && curFolder) {
+      this.emitIfInbox(curFolder);
+    }
+  },
+
   /**
    * Called by Cards when the instance of this card type is the
    * visible card.
@@ -1444,6 +1468,10 @@ MessageListCard.prototype = {
     } else {
       this.showSearch('', 'all');
     }
+
+    // If an inbox, event out, to allow listeners like 'sync' to
+    // then clear notifications for that type.
+    this.emitIfInbox(folder);
   },
 
   die: function() {

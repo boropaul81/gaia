@@ -261,6 +261,14 @@ Cards = {
     this._cardsNode.addEventListener('transitionend',
                                      this._onTransitionEnd.bind(this),
                                      false);
+
+    // Listen for visibility changes to let current card know of them too.
+    document.addEventListener('visibilitychange', function(evt) {
+      var card = this._cardStack[this.activeCardIndex];
+      if (card && card.cardImpl.onPageVisibilityChange) {
+        card.cardImpl.onPageVisibilityChange(document.hidden);
+      }
+    }.bind(this));
   },
 
   /**
