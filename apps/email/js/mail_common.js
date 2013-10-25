@@ -460,8 +460,15 @@ Cards = {
     }
     this._cardStack.splice(cardIndex, 0, cardInst);
 
-    if (!args.cachedNode)
-      this._cardsNode.insertBefore(domNode, insertBuddy);
+    if (!args.cachedNode) {
+      if (args.insertBeforeNode) {
+        cardInst.useInsertBeforeNode = true;
+        args.insertBeforeNode.parentNode.insertBefore(domNode,
+                                                      args.insertBeforeNode);
+      } else {
+        this._cardsNode.insertBefore(domNode, insertBuddy);
+      }
+    }
 
     // If the card has any <button type="reset"> buttons,
     // make them clear the field they're next to and not the entire form.
@@ -756,9 +763,17 @@ Cards = {
     }
 
     var cardInst = (cardIndex !== null) ? this._cardStack[cardIndex] : null;
-    var beginNode = this._cardStack[this.activeCardIndex].domNode;
+    var activeCard = this._cardStack[this.activeCardIndex];
+    var beginNode = activeCard.domNode;
     var endNode = this._cardStack[cardIndex].domNode;
     var isForward = navDirection === 'forward';
+
+    if (activeCard.insertBeforeNode && !isForward) {
+      activeCard.insertBeforeNode
+      .parentNode.insertBefore(beginNode, activeCard.insertBeforeNode);
+      activeCard.insertBeforeNode = null;
+      this._cardsNode.clientWidth;
+    }
 
     if (this._cardStack.length === 1) {
       // Reset zIndex so that it does not grow ever higher when all but
@@ -890,6 +905,13 @@ Cards = {
       // If an vertical overlay transition was was disabled, if
       // current node index is an overlay, enable it again.
       var endNode = activeCard.domNode;
+
+      if (activeCard.useInsertBeforeNode) {
+        activeCard.insertBeforeNode = endNode.nextElementSibling;
+        this._cardsNode.insertBefore(endNode, activeCard.insertBuddy);
+        activeCard.useInsertBeforeNode = false;
+      }
+
       if (endNode.classList.contains('disabled-anim-vertical')) {
         removeClass(endNode, 'disabled-anim-vertical');
         addClass(endNode, 'anim-vertical');

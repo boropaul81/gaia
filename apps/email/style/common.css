@@ -71,6 +71,10 @@ body {
   transform: translateY(100%);
 }
 
+.card.before.upflow.anim-vertical {
+  transform: translateY(-100%);
+}
+
 .card.after {
   /* Show a sliver of the after card, to kickstart
   platform for a smooth, non-black transition: 828266.
@@ -82,15 +86,8 @@ body {
   transform: translateY(-100%);
 }
 
-
-.card.center.card-folder-picker,
-.card.center.card-account-picker,
-.card.card-account-picker {
-  width: calc(100% - 5em);
-}
-
-.card.center.card-folder-picker + .card.after {
-  transform: translateX(calc(100% - 5em));
+.card.after.upflow.anim-vertical {
+  transform: translateY(100%);
 }
 
 .form-card {

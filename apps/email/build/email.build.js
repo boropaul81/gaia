@@ -26,8 +26,7 @@
         'iframe_shims',
 
         // Bundle most likely, frequently used cards
-        'cards/message_list',
-        'cards/folder_picker'
+        'cards/message_list'
       ]
     },
     {

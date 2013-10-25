@@ -1,6 +1,10 @@
 .card-message-list {
 }
 
+.msg-list-header {
+  z-index: 10;
+}
+
 .msg-listedit-header {
 }
 .msg-list-scrollouter {

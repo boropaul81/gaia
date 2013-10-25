@@ -363,32 +363,14 @@ MessageListCard.prototype = {
   },
 
   onShowFolders: function() {
-    var query = ['folder_picker', 'navigation'];
-    if (Cards.hasCard(query)) {
-      Cards.moveToCard(query);
-    } else {
-      // Add navigation, but before the message list.
-      Cards.pushCard(
-        'folder_picker', 'navigation', 'none',
-        {
-          onPushed: function() {
-            setTimeout(function() {
-            // Do showCard here instead of using an 'animate'
-            // for the pushCard call, since the styling of
-            // the folder_picker uses new images that need to
-            // load, and if 'animate' is used, the banner
-            // gradient is not loaded during the transition.
-            // The setTimeout also gives the header image a
-            // chance to finish loading. Without it, there is
-            // still a white flash. Going lower than 50, not
-            // specifying a value, still resulted in white flash.
-            Cards.moveToCard(query);
-          }, 50);
-          }.bind(this)
-        },
-        // Place to left of message list
-        'left');
-    }
+console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
+    Cards.pushCard('folder_picker', 'default', 'animate', {
+      insertBeforeNode: this.domNode.querySelector('.msg-list-header'),
+      onPushed: function() {
+        this.domNode.querySelector('menu[type="toolbar"]')
+          .classList.add('hidden');
+      }.bind(this)
+    });
   },
 
   onCompose: function() {
@@ -1137,6 +1119,9 @@ MessageListCard.prototype = {
    * visible card.
    */
   onCardVisible: function() {
+    this.domNode.querySelector('menu[type="toolbar"]')
+      .classList.remove('hidden');
+
     if (this._whenVisible) {
       var fn = this._whenVisible;
       this._whenVisible = null;

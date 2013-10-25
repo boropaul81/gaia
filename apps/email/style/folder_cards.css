@@ -1,3 +1,34 @@
+.card-folder-picker .fld-folders-header {
+  margin-top: 5rem;
+}
+
+.card-folder-picker .scrollregion-below-header {
+  height: calc(100% - 19rem);
+}
+
+
+.card-folder-picker,
+.card-account-picker {
+  background-color: transparent;
+  color: white;
+}
+
+.fld-folders-container,
+.acct-scroller-region {
+  background: #3a4446 url(images/pattern.png);
+  background-size: auto auto, 100% 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.fld-nav-toolbar.bottom-toolbar {
+  bottom: 5rem;
+}
+
+.fld-folders-container {
+  padding-bottom: 9.6rem;
+}
+
 .card-account-picker {
 }
 
@@ -36,30 +67,6 @@
   font-size: 150%;
   font-weight: normal;
   padding: 0 1rem;
-}
-
-.card-folder-picker,
-.card-account-picker {
-  box-shadow: inset 0 0 1rem black;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-}
-
-.fld-folders-container,
-.acct-scroller-region {
-  background: #3a4446 url(images/pattern.png);
-  background-size: auto auto, 100% 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.fld-folders-container {
-  padding-bottom: 9.6rem;
-}
-
-.folder-scroller-region.scrollregion-below-header,
-.acct-scroller-region.scrollregion-below-header {
-  height: calc(100% - 5rem);
 }
 
 .fld-folders-container {
