@@ -230,6 +230,16 @@ function MessageListCard(domNode, mode, args) {
   this.onCurrentMessage = this.onCurrentMessage.bind(this);
   headerCursor.on('currentMessage', this.onCurrentMessage);
 
+  this.domNode.addEventListener('transitionend', function(evt) {
+    var target = evt.target;
+
+    if (target.classList.contains('anim-opacity')) {
+      if (window.getComputedStyle(target).opacity === '0') {
+        target.classList.add('hidden');
+      }
+    }
+  }, false);
+
   // If this card is created after header_cursor is set up
   // with a messagesSlice, then need to bootstrap this card
   // to catch up, since the normal events will not fire.
@@ -408,33 +418,26 @@ MessageListCard.prototype = {
     this.scrollNode.scrollTop = searchBar.offsetHeight;
   },
 
-  onShowFolders: function() {
-    var query = ['folder_picker', 'navigation'];
-    if (Cards.hasCard(query)) {
-      Cards.moveToCard(query);
+  toggleDrawerShield: function(state) {
+    var classList = this.domNode.querySelector('.drawer-shield').classList;
+    if (state === 'on') {
+      classList.remove('hidden');
+      classList.remove('transparent');
     } else {
-      // Add navigation, but before the message list.
-      Cards.pushCard(
-        'folder_picker', 'navigation', 'none',
-        {
-          onPushed: function() {
-            setTimeout(function() {
-            // Do showCard here instead of using an 'animate'
-            // for the pushCard call, since the styling of
-            // the folder_picker uses new images that need to
-            // load, and if 'animate' is used, the banner
-            // gradient is not loaded during the transition.
-            // The setTimeout also gives the header image a
-            // chance to finish loading. Without it, there is
-            // still a white flash. Going lower than 50, not
-            // specifying a value, still resulted in white flash.
-            Cards.moveToCard(query);
-          }, 50);
-          }.bind(this)
-        },
-        // Place to left of message list
-        'left');
+      classList.add('transparent');
     }
+  },
+
+  onShowFolders: function() {
+console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
+    this.toggleDrawerShield('on');
+    Cards.pushCard('folder_picker', 'default', 'animate', {
+      insertBeforeNode: this.domNode.querySelector('.msg-list-header'),
+      onPushed: function() {
+        this.domNode.querySelector('menu[type="toolbar"]')
+          .classList.add('transparent');
+      }.bind(this)
+    });
   },
 
   onCompose: function() {
@@ -895,6 +898,10 @@ MessageListCard.prototype = {
         childNode.parentNode.removeChild(childNode);
       }
     }
+
+    // Make sure shield is off too
+    cacheNode.querySelector('.drawer-shield').classList.add('hidden');
+
     htmlCache.saveFromNode(cacheNode);
   },
 
@@ -1195,6 +1202,19 @@ MessageListCard.prototype = {
       starNode.classList.add('msg-header-star-starred');
     else
       starNode.classList.remove('msg-header-star-starred');
+  },
+
+  /**
+   * Called by Crds when instance of this card is transitioning into
+   * becoming the visible card.
+   */
+  onCardBecomingVisible: function() {
+    var toolbarClassList = this.domNode.querySelector('menu[type="toolbar"]')
+                                       .classList;
+    toolbarClassList.remove('hidden');
+    toolbarClassList.remove('transparent');
+
+    this.toggleDrawerShield('off');
   },
 
   /**

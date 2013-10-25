@@ -1,6 +1,10 @@
 .card-message-list {
 }
 
+.msg-list-header {
+  z-index: 50;
+}
+
 .msg-listedit-header {
 }
 .msg-list-scrollouter {
@@ -583,3 +587,21 @@ input.msg-search-text-tease {
 .msg-reply-menu-forward:before {
   background-image: url("images/icons/forward.png");
 }
+
+.card-message-list .drawer-shield {
+  position: absolute;
+  top: 5em;
+  width: 100%;
+  height: calc(100% - 5em);
+  background:
+    url(../shared/style/action_menu/images/ui/pattern.png) repeat left top,
+    url(../shared/style/action_menu/images/ui/gradient.png) no-repeat left top / 100% 100%;
+  opacity: .6;
+  z-index: 9;
+}
+
+.card-message-list .drawer-shield.transparent,
+.card-message-list .drawer-shield.hidden {
+  opacity: 0;
+}
+
