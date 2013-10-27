@@ -1,5 +1,7 @@
 .card-folder-picker .fld-folders-header {
+  position: relative;
   margin-top: 5rem;
+  clear: both;
 }
 
 .card-folder-picker .scrollregion-below-header {
@@ -32,6 +34,30 @@
 .card-account-picker {
 }
 
+.fld-arrow {
+  position: absolute;
+  right: 1em;
+}
+
+.fld-acct-list-container {
+  overflow: hidden;
+  -moz-transition-property: max-height;
+  -moz-transition-duration: 0.3s;
+  -moz-transition-timing-function: ease;
+  -moz-transition-delay: 0;
+}
+
+.fld-acct-list-container.closed {
+  height: 0;
+  max-height: 0;
+}
+
+.fld-acct-list-container.opened {
+  height: auto;
+  max-height: 50%;
+}
+
+
 .fld-accounts-header {
 }
 .fld-accounts-header-label {
@@ -47,8 +73,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.fld-account-item {
+  background: black;
+}
 .fld-account-selected {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: #222222;
   font-weight: bold;
 }
 .fld-account-name {

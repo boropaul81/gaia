@@ -10,7 +10,9 @@ var templateNode = require('tmpl!./folder_picker.html'),
     model = require('model'),
     mozL10n = require('l10n!'),
     Cards = common.Cards,
-    bindContainerHandler = common.bindContainerHandler;
+    bindContainerHandler = common.bindContainerHandler,
+    addClass = common.addClass,
+    removeClass = common.removeClass;
 
 require('css!style/folder_cards');
 
@@ -22,11 +24,12 @@ function FolderPickerCard(domNode, mode, args) {
   bindContainerHandler(this.foldersContainer, 'click',
                        this.onClickFolder.bind(this));
 
-  this.accountButton = domNode.getElementsByClassName('fld-accounts-btn')[0];
-  this.accountButton
-    .addEventListener('click', this.onShowAccounts.bind(this), false);
   domNode.getElementsByClassName('fld-nav-settings-btn')[0]
     .addEventListener('click', this.onShowSettings.bind(this), false);
+
+  this.foldersHeader = domNode.getElementsByClassName('fld-folders-header')[0];
+  this.foldersHeader
+      .addEventListener('click', this.toggleAccounts.bind(this), false);
 
   domNode.addEventListener('click', function(evt) {
     if (evt.originalTarget === domNode) {
@@ -42,9 +45,11 @@ function FolderPickerCard(domNode, mode, args) {
   this._boundUpdateAccount = this.updateAccount.bind(this);
   model.latest('account', this._boundUpdateAccount);
 
+  this.accountsContainer =
+    domNode.getElementsByClassName('fld-acct-list-container')[0];
+  bindContainerHandler(this.accountsContainer, 'click',
+                       this.onClickAccount.bind(this));
 
- this.accountsContainer =
-    domNode.getElementsByClassName('acct-list-container')[0];
   this.acctsSlice = model.api.viewAccounts(false);
   this.acctsSlice.onsplice = this.onAccountsSplice.bind(this);
   this.acctsSlice.onchange = this.onAccountsChange.bind(this);
@@ -111,18 +116,47 @@ FolderPickerCard.prototype = {
       }.bind(this));
     }
   },
-  onShowAccounts: function() {
-    if (!this.curAccount)
-      return;
 
-    // Add account picker before this folder list.
-    Cards.pushCard(
-      'account_picker', 'navigation', 'animate',
-      {
-        curAccountId: this.curAccount.id
-      },
-      // Place to left of message list
-      'left');
+  /**
+   * Clicking a different account changes the list of folders displayed.  We
+   * then trigger a select of the inbox for that account because otherwise
+   * things get permutationally complex.
+   */
+  onClickAccount: function(accountNode, event) {
+    var oldAccountId = this.curAccount.id,
+        accountId = accountNode.account.id;
+
+    this.curAccount = accountNode.account;
+
+    if (oldAccountId !== accountId) {
+      model.changeAccountFromId(accountId);
+    }
+
+    this.hideAccounts();
+  },
+
+  toggleAccounts: function() {
+    if (this.accountsContainer.classList.contains('opened')) {
+      this.hideAccounts();
+    } else {
+      this.showAccounts();
+    }
+  },
+
+  showAccounts: function() {
+    addClass(this.foldersHeader, 'opened');
+    addClass(this.accountsContainer, 'opened');
+
+    removeClass(this.foldersHeader, 'closed');
+    removeClass(this.accountsContainer, 'closed');
+  },
+
+  hideAccounts: function() {
+    addClass(this.foldersHeader, 'closed');
+    addClass(this.accountsContainer, 'closed');
+
+    removeClass(this.foldersHeader, 'opened');
+    removeClass(this.accountsContainer, 'opened');
   },
 
   onAccountsSplice: function(index, howMany, addedItems,
