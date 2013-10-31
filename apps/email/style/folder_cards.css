@@ -24,6 +24,9 @@
 }
 
 .fld-nav-toolbar.bottom-toolbar {
+  text-align: center;
+  background: white;
+  color: black;
   bottom: 5rem;
 }
 
@@ -158,6 +161,8 @@
 }
 
 .fld-nav-settings-btn {
+  width: 2rem;
+  margin: 0;
   background-image: url("images/icons/settings.png") !important;
 }
 

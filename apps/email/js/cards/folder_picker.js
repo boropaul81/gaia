@@ -24,7 +24,7 @@ function FolderPickerCard(domNode, mode, args) {
   bindContainerHandler(this.foldersContainer, 'click',
                        this.onClickFolder.bind(this));
 
-  domNode.getElementsByClassName('fld-nav-settings-btn')[0]
+  domNode.getElementsByClassName('fld-nav-toolbar')[0]
     .addEventListener('click', this.onShowSettings.bind(this), false);
 
   this.foldersHeader = domNode.getElementsByClassName('fld-folders-header')[0];
@@ -39,8 +39,6 @@ function FolderPickerCard(domNode, mode, args) {
 
   this.toolbarAccountProblemNode =
     domNode.getElementsByClassName('fld-nav-account-problem')[0];
-  this.lastSyncedAtNode =
-    domNode.getElementsByClassName('fld-nav-last-synced-value')[0];
 
   this._boundUpdateAccount = this.updateAccount.bind(this);
   model.latest('account', this._boundUpdateAccount);
@@ -74,7 +72,6 @@ FolderPickerCard.prototype = {
 
     if (oldAccount !== account) {
       this.foldersContainer.innerHTML = '';
-      date.setPrettyNodeDate(this.lastSyncedAtNode);
 
       model.latestOnce('folder', function(folder) {
         this.curAccount = account;
@@ -112,7 +109,6 @@ FolderPickerCard.prototype = {
         // out. However, so far folder_picker is the only one that cares
         // about these dynamic updates.
         this.foldersSlice.onsplice = this.onFoldersSplice.bind(this);
-        this.foldersSlice.onchange = this.onFoldersChange.bind(this);
       }.bind(this));
     }
   },
@@ -180,24 +176,7 @@ FolderPickerCard.prototype = {
       accountNode.account = account;
       this.updateAccountDom(account, true);
       accountsContainer.insertBefore(accountNode, insertBuddy);
-
-      //fetch last sync date for display
-      this.fetchLastSyncDate(account,
-                   accountNode.querySelector('.fld-account-lastsync-value'));
     }.bind(this));
-  },
-
-  fetchLastSyncDate: function(account, node) {
-    var foldersSlice = model.api.viewFolders('account', account);
-    foldersSlice.oncomplete = (function() {
-      var inbox = foldersSlice.getFirstFolderWithType('inbox'),
-          lastSyncTime = inbox && inbox.lastSyncedAt;
-
-      if (lastSyncTime) {
-        date.setPrettyNodeDate(node, lastSyncTime);
-      }
-      foldersSlice.die();
-    }).bind(this);
   },
 
   onAccountsChange: function(account) {
@@ -232,7 +211,6 @@ FolderPickerCard.prototype = {
       }
     }
 
-    var dirtySyncTime = false;
     var insertBuddy = (index >= foldersContainer.childElementCount) ?
                         null : foldersContainer.children[index],
         self = this;
@@ -241,30 +219,7 @@ FolderPickerCard.prototype = {
       folderNode.folder = folder;
       self.updateFolderDom(folder, true);
       foldersContainer.insertBefore(folderNode, insertBuddy);
-
-      if (self.mostRecentSyncTimestamp < folder.lastSyncedAt) {
-        self.mostRecentSyncTimestamp = folder.lastSyncedAt;
-        dirtySyncTime = true;
-      }
     });
-    if (dirtySyncTime)
-      this.updateLastSyncedUI();
-  },
-
-  onFoldersChange: function(folder) {
-    if (this.mostRecentSyncTimestamp < folder.lastSyncedAt) {
-      this.mostRecentSyncTimestamp = folder.lastSyncedAt;
-      this.updateLastSyncedUI();
-    }
-  },
-
-  updateLastSyncedUI: function() {
-    if (this.mostRecentSyncTimestamp) {
-      date.setPrettyNodeDate(this.lastSyncedAtNode,
-                             this.mostRecentSyncTimestamp);
-    } else {
-      this.lastSyncedAtNode.textContent = mozL10n.get('account-never-synced');
-    }
   },
 
   updateSelfDom: function(isAccount) {

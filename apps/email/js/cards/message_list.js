@@ -362,8 +362,14 @@ MessageListCard.prototype = {
     this.scrollNode.scrollTop = searchBar.offsetHeight;
   },
 
+  toggleDrawerShield: function(state) {
+    var classList = this.domNode.querySelector('.drawer-shield').classList;
+    classList[state === 'on' ? 'remove' : 'add']('hidden');
+  },
+
   onShowFolders: function() {
 console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
+    this.toggleDrawerShield('on');
     Cards.pushCard('folder_picker', 'default', 'animate', {
       insertBeforeNode: this.domNode.querySelector('.msg-list-header'),
       onPushed: function() {
@@ -1121,6 +1127,7 @@ console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
   onCardVisible: function() {
     this.domNode.querySelector('menu[type="toolbar"]')
       .classList.remove('hidden');
+    this.toggleDrawerShield('off');
 
     if (this._whenVisible) {
       var fn = this._whenVisible;

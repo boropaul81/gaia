@@ -576,3 +576,14 @@ input.msg-search-text-tease {
 .msg-reply-menu-forward:before {
   background-image: url("images/icons/forward.png");
 }
+
+.card-message-list .drawer-shield {
+  position: absolute;
+  top: 5em;
+  width: 100%;
+  height: calc(100% - 5em);
+  background: black;
+  opacity: .75;
+  z-index: 15;
+}
+
