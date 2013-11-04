@@ -28,7 +28,7 @@ function FolderPickerCard(domNode, mode, args) {
     .addEventListener('click', this.onShowSettings.bind(this), false);
 
   this.foldersHeader = domNode.getElementsByClassName('fld-folders-header')[0];
-  this.foldersHeader
+  domNode.getElementsByClassName('fld-account-switch-btn')[0]
       .addEventListener('click', this.toggleAccounts.bind(this), false);
 
   domNode.addEventListener('click', function(evt) {
@@ -172,6 +172,12 @@ FolderPickerCard.prototype = {
       this.updateAccountDom(account, true);
       accountsContainer.insertBefore(accountNode, insertBuddy);
     }.bind(this));
+
+    if (accountsContainer.children.length < 2) {
+      addClass(this.domNode, 'one-account');
+    } else {
+      removeClass(this.domNode, 'one-account');
+    }
   },
 
   onAccountsChange: function(account) {

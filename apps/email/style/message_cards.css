@@ -584,6 +584,6 @@ input.msg-search-text-tease {
   height: calc(100% - 5em);
   background: black;
   opacity: .75;
-  z-index: 15;
+  z-index: 9;
 }
 
