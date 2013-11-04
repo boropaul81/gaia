@@ -44,7 +44,11 @@ body {
 
 }
 
-.card.anim-up center {
+.card.anim-fade {
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 0.3s;
+  -moz-transition-timing-function: ease;
+  -moz-transition-delay: 0;
   transition: translateX(0);
 }
 
@@ -60,6 +64,10 @@ body {
   transform: translateY(0);
 }
 
+.card.center.anim-fade {
+  opacity: 1;
+}
+
 .card.before {
   /* Show a sliver of the before card, to kickstart
   platform for a smooth, non-black transition: 828266.
@@ -69,6 +77,11 @@ body {
 
 .card.before.anim-vertical {
   transform: translateY(100%);
+}
+
+.card.before.anim-fade {
+  transform: translateX(0);
+  opacity: 0;
 }
 
 .card.before.upflow.anim-vertical {
@@ -88,6 +101,11 @@ body {
 
 .card.after.upflow.anim-vertical {
   transform: translateY(100%);
+}
+
+.card.after.anim-fade {
+  transform: translateX(0);
+  opacity: 0;
 }
 
 .form-card {

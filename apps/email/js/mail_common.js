@@ -798,10 +798,14 @@ Cards = {
       if (isForward) {
         // If a forward animation and overlay had a vertical transition,
         // disable it, use normal horizontal transition.
-        if (showMethod !== 'immediate' &&
-            beginNode.classList.contains('anim-vertical')) {
-          removeClass(beginNode, 'anim-vertical');
-          addClass(beginNode, 'disabled-anim-vertical');
+        if (showMethod !== 'immediate') {
+          if (beginNode.classList.contains('anim-vertical')) {
+            removeClass(beginNode, 'anim-vertical');
+            addClass(beginNode, 'disabled-anim-vertical');
+          } else if (beginNode.classList.contains('anim-fade')) {
+            removeClass(beginNode, 'anim-fade');
+            addClass(beginNode, 'disabled-anim-fade');
+          }
         }
       } else {
         endNode = null;
@@ -915,6 +919,9 @@ Cards = {
       if (endNode.classList.contains('disabled-anim-vertical')) {
         removeClass(endNode, 'disabled-anim-vertical');
         addClass(endNode, 'anim-vertical');
+      } else if (endNode.classList.contains('disabled-anim-fade')) {
+        removeClass(endNode, 'disabled-anim-fade');
+        addClass(endNode, 'anim-fade');
       }
 
       // Popup toaster that pended for previous card view.

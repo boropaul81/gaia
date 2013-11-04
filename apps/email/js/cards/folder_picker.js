@@ -37,9 +37,6 @@ function FolderPickerCard(domNode, mode, args) {
     }
   }.bind(this), false);
 
-  this.toolbarAccountProblemNode =
-    domNode.getElementsByClassName('fld-nav-account-problem')[0];
-
   this._boundUpdateAccount = this.updateAccount.bind(this);
   model.latest('account', this._boundUpdateAccount);
 
@@ -132,16 +129,15 @@ FolderPickerCard.prototype = {
   },
 
   toggleAccounts: function() {
-    if (this.accountsContainer.classList.contains('opened')) {
-      this.hideAccounts();
-    } else {
+    if (this.accountsContainer.classList.contains('closed')) {
       this.showAccounts();
+    } else {
+      this.hideAccounts();
     }
   },
 
   showAccounts: function() {
-    addClass(this.foldersHeader, 'opened');
-    addClass(this.accountsContainer, 'opened');
+    addClass(this.foldersContainer, 'closed');
 
     removeClass(this.foldersHeader, 'closed');
     removeClass(this.accountsContainer, 'closed');
@@ -151,8 +147,7 @@ FolderPickerCard.prototype = {
     addClass(this.foldersHeader, 'closed');
     addClass(this.accountsContainer, 'closed');
 
-    removeClass(this.foldersHeader, 'opened');
-    removeClass(this.accountsContainer, 'opened');
+    removeClass(this.foldersContainer, 'closed');
   },
 
   onAccountsSplice: function(index, howMany, addedItems,
@@ -227,12 +222,6 @@ FolderPickerCard.prototype = {
       this.curAccount.name;
     this.domNode.getElementsByClassName('fld-folders-header-account-label')[0]
       .textContent = str;
-
-    // Update account problem status
-    if (this.curAccount.problems.length)
-      this.toolbarAccountProblemNode.classList.remove('collapsed');
-    else
-      this.toolbarAccountProblemNode.classList.add('collapsed');
   },
 
   updateFolderDom: function(folder, firstTime) {

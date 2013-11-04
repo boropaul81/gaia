@@ -4,23 +4,58 @@
   clear: both;
 }
 
-.card-folder-picker .scrollregion-below-header {
+.card-folder-picker .slot-machine {
+  position: relative;
+  overflow: hidden;
   height: calc(100% - 19rem);
 }
 
+.fld-acct-list-container.closed {
+
+}
+
+.fld-acct-list-container,
+.fld-folders-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: white;
+  -moz-transition-property: transform;
+  -moz-transition-duration: 0.3s;
+  -moz-transition-timing-function: ease;
+  -moz-transition-delay: 0;
+}
+
+.fld-acct-list-container.closed {
+  transform: translateY(-100%);
+}
+
+.fld-acct-list-container {
+  transform: translateY(0);
+}
+
+.fld-folders-container {
+  background: #3a4446 url(images/pattern.png);
+  background-size: auto auto, 100% 100%;
+  padding-bottom: 9.6rem;
+}
+
+.fld-folders-container.closed {
+  transform: translateY(100%);
+}
+
+.fld-folders-container {
+  transform: translateY(0);
+}
 
 .card-folder-picker,
 .card-account-picker {
   background-color: transparent;
   color: white;
-}
-
-.fld-folders-container,
-.acct-scroller-region {
-  background: #3a4446 url(images/pattern.png);
-  background-size: auto auto, 100% 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .fld-nav-toolbar.bottom-toolbar {
@@ -30,10 +65,6 @@
   bottom: 5rem;
 }
 
-.fld-folders-container {
-  padding-bottom: 9.6rem;
-}
-
 .card-account-picker {
 }
 
@@ -41,25 +72,6 @@
   position: absolute;
   right: 1em;
 }
-
-.fld-acct-list-container {
-  overflow: hidden;
-  -moz-transition-property: max-height;
-  -moz-transition-duration: 0.3s;
-  -moz-transition-timing-function: ease;
-  -moz-transition-delay: 0;
-}
-
-.fld-acct-list-container.closed {
-  height: 0;
-  max-height: 0;
-}
-
-.fld-acct-list-container.opened {
-  height: auto;
-  max-height: 50%;
-}
-
 
 .fld-accounts-header {
 }
@@ -88,23 +100,12 @@
   font-size: 1.7rem;
   padding: 0 1rem;
 }
-.fld-account-problem {
-  color: red;
-  font-size: 200%;
-  font-weight: bold;
-  padding-left: 2rem;
-}
 
 .fld-account-lastsync {
   color: #c7c7c7;
   font-size: 150%;
   font-weight: normal;
   padding: 0 1rem;
-}
-
-.fld-folders-container {
-  -moz-transition: transform .2s ease-in;
-  overflow-y: auto;
 }
 
 .fld-accounts-btn {
@@ -185,11 +186,3 @@
   white-space: nowrap;
 }
 
-.fld-nav-account-problem {
-  display: inline-block;
-  color: red;
-  font-weight: bold;
-  font-size: 200%;
-  position: absolute;
-  right: 0;
-}
