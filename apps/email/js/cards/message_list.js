@@ -212,8 +212,7 @@ function MessageListCard(domNode, mode, args) {
   this.domNode.addEventListener('transitionend', function(evt) {
     var target = evt.target;
     if (target.classList.contains('anim-opacity')) {
-      if (window.getComputedStyle(target).opacity === 0) {
-console.log('HERE HIDING TRANSPARENT');
+      if (window.getComputedStyle(target).opacity === '0') {
         target.classList.add('hidden');
       }
     }

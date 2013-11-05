@@ -37,23 +37,23 @@ body {
   width: 100%;
   height: 100%;
   background-color: white;
-  -moz-transition-property: transform;
-  -moz-transition-duration: 0.3s;
-  -moz-transition-timing-function: ease;
-  -moz-transition-delay: 0;
+  transition-property: transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+  transition-delay: 0;
 
 }
 
 .card.anim-fade {
-  -moz-transition-property: opacity;
-  -moz-transition-duration: .8s;
-  -moz-transition-timing-function: ease;
-  -moz-transition-delay: 0;
+  transition-property: opacity;
+  transition-duration: .8s;
+  transition-timing-function: ease;
+  transition-delay: 0;
   transition: translateX(0);
 }
 
 .card.no-anim {
-  -moz-transition-property: none;
+  transition-property: none;
 }
 
 .card.center {
@@ -257,7 +257,7 @@ section[role="status"].customized {
 }
 
 section[role="status"].fadeout {
-  -moz-transition: opacity 500ms ease;
+  transition: opacity 500ms ease;
   opacity: 0;
 }
 
@@ -284,10 +284,10 @@ section[role="status"][title="retry"] .toaster-banner-retry {
 
 /* General helpers for opacity transition */
 .anim-opacity {
-  -moz-transition-property: opacity;
-  -moz-transition-duration: 0.6s;
-  -moz-transition-timing-function: ease;
-  -moz-transition-delay: 0;
+  transition-property: opacity;
+  transition-duration: 0.6s;
+  transition-timing-function: ease;
+  transition-delay: 0;
 }
 
 .transparent {

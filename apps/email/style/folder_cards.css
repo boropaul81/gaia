@@ -39,10 +39,10 @@
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  -moz-transition-property: transform;
-  -moz-transition-duration: 0.2s;
-  -moz-transition-timing-function: ease;
-  -moz-transition-delay: 0;
+  transition-property: transform;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+  transition-delay: 0;
 }
 
 .fld-acct-list-container.closed {
@@ -145,17 +145,18 @@
   position: absolute;
   top: 0.3rem;
   right: 0;
-  width: 2em;
+  width: 3em;
+  border: 0;
   border-left: 0.1rem solid #e3e3e3;
   color: #5F5F5F;
 }
 
-.fld-account-switch-btn:before {
-  content: '\25B2';
+.fld-account-switch-btn {
+  background: url(images/icons/arrow_down.png) no-repeat scroll 50% 50% transparent;
 }
 
-.fld-folders-header.closed .fld-account-switch-btn:before {
-  content: '\25BC';
+.fld-folders-header.closed .fld-account-switch-btn {
+  background: url(images/icons/arrow_up.png) no-repeat scroll 50% 50% transparent;
 }
 
 .fld-folder-item:last-child {
@@ -204,7 +205,11 @@
 .fld-nav-settings-btn {
   width: 2rem;
   margin: 0;
-  background-image: url("images/icons/settings.png") !important;
+  background-image: url("images/icons/settings_icon.png") !important;
+}
+
+.fld-nav-settings-btn:active {
+  background-image: url("images/icons/settings_icon_press.png") !important;
 }
 
 .fld-nav-last-synced {
