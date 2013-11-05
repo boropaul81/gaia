@@ -501,6 +501,32 @@ suite('system/Statusbar', function() {
       mockTel.mTriggerEvent(evt);
       assert.equal(mockTel.mCountEventListener('callschanged', StatusBar), 1);
     });
+
+    test('EVDO connection, show data call signal strength', function() {
+      MockNavigatorMozMobileConnection.voice = {
+        connected: false,
+        relSignalStrength: 0,
+        emergencyCallsOnly: false,
+        state: 'notSearching',
+        roaming: false,
+        network: {}
+      };
+      MockNavigatorMozMobileConnection.data = {
+        connected: true,
+        relSignalStrength: 80,
+        type: 'evdo',
+        emergencyCallsOnly: false,
+        state: 'notSearching',
+        roaming: false,
+        network: {}
+      };
+
+      IccHelper.mProps['cardState'] = 'ready';
+      IccHelper.mProps['iccInfo'] = {};
+
+      StatusBar.update.signal.call(StatusBar);
+      assert.equal(dataset.level, 4);
+    });
   }),
 
   suite('data connection', function() {
@@ -655,7 +681,7 @@ suite('system/Statusbar', function() {
             type: 'ehrpd'
           };
           StatusBar.update.data.call(StatusBar);
-          assert.equal(StatusBar.icons.data.textContent, '1x');
+          assert.equal(StatusBar.icons.data.textContent, '');
         });
 
         test('type evdo0', function() {
@@ -665,7 +691,7 @@ suite('system/Statusbar', function() {
             type: 'evdo0'
           };
           StatusBar.update.data.call(StatusBar);
-          assert.equal(StatusBar.icons.data.textContent, '1x');
+          assert.equal(StatusBar.icons.data.textContent, '');
         });
 
         test('type evdoa', function() {
@@ -675,7 +701,7 @@ suite('system/Statusbar', function() {
             type: 'evdoa'
           };
           StatusBar.update.data.call(StatusBar);
-          assert.equal(StatusBar.icons.data.textContent, '1x');
+          assert.equal(StatusBar.icons.data.textContent, '');
         });
 
         test('type evdob', function() {
@@ -685,7 +711,7 @@ suite('system/Statusbar', function() {
             type: 'evdob'
           };
           StatusBar.update.data.call(StatusBar);
-          assert.equal(StatusBar.icons.data.textContent, '1x');
+          assert.equal(StatusBar.icons.data.textContent, '');
         });
       });
 

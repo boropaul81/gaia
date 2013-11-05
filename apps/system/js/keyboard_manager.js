@@ -90,6 +90,7 @@ var KeyboardManager = {
       console.log('[Keyboard Manager] ' + msg);
   },
   keyboardHeight: 0,
+  isOutOfProcessEnabled: false,
 
   init: function km_init() {
     // generate typeTable
@@ -100,6 +101,11 @@ var KeyboardManager = {
       res[k].push(curr);
       return res;
     }, {});
+
+    SettingsListener.observe('debug.keyboard-oop.enabled', false,
+      function(value) {
+        this.isOutOfProcessEnabled = value;
+      }.bind(this));
 
     this.keyboardFrameContainer = document.getElementById('keyboards');
 
@@ -125,6 +131,7 @@ var KeyboardManager = {
     // when an inline activity goes away.
     window.addEventListener('appwillclose', this);
     window.addEventListener('activitywillclose', this);
+    window.addEventListener('attentionscreenshow', this);
 
     // To handle keyboard layout switching
     window.addEventListener('mozChromeEvent', function(evt) {
@@ -255,6 +262,9 @@ var KeyboardManager = {
         if (!self.keyboardLayouts[group]) {
           group = 'text';
         }
+        if (group !== self.showingLayout.type) {
+          self.resetShowingKeyboard();
+        }
         self.setKeyboardToShow(group);
         self.showKeyboard();
 
@@ -343,7 +353,12 @@ var KeyboardManager = {
     keyboard.setAttribute('mozbrowser', 'true');
     keyboard.setAttribute('mozpasspointerevents', 'true');
     keyboard.setAttribute('mozapp', manifestURL);
-    //keyboard.setAttribute('remote', 'true');
+
+    if (this.isOutOfProcessEnabled) {
+      console.log('=== Enable keyboard run as OOP ===');
+      keyboard.setAttribute('remote', 'true');
+      keyboard.classList.add('ignore-focus');
+    }
 
     this.keyboardFrameContainer.appendChild(keyboard);
     return keyboard;
@@ -374,8 +389,7 @@ var KeyboardManager = {
     };
 
     // If the keyboard is hidden, or when transitioning is not finished
-    if (this.keyboardFrameContainer.classList.contains('hide') ||
-        this.keyboardFrameContainer.dataset.transitionIn === 'true') {
+    if (this.keyboardFrameContainer.dataset.transitionIn === 'true') {
       this.showKeyboard(updateHeight);
     } else {
       updateHeight();
@@ -383,13 +397,21 @@ var KeyboardManager = {
   },
 
   handleEvent: function km_handleEvent(evt) {
+    var self = this;
     switch (evt.type) {
       case 'mozbrowserresize':
         this.resizeKeyboard(evt);
         break;
+      case 'attentionscreenshow':
+        // If we call hideKeyboardImmediately synchronously,
+        // attention screen will not show up.
+        setTimeout(function hideKeyboardAsync() {
+          self.hideKeyboardImmediately();
+        }, 0);
+        break;
       case 'activitywillclose':
       case 'appwillclose':
-        this.hideKeyboard();
+        this.hideKeyboardImmediately();
         break;
       //XXX the following case hasn't been tested.
       case 'mozbrowsererror': // OOM
@@ -451,8 +473,11 @@ var KeyboardManager = {
       return;
     }
 
-    this.keyboardFrameContainer.classList.remove('hide');
-    this.keyboardFrameContainer.dataset.transitionIn = 'true';
+    if (this.keyboardFrameContainer.classList.contains('hide')) {
+      delete this.keyboardFrameContainer.dataset.transitionOut;
+      this.keyboardFrameContainer.classList.remove('hide');
+      this.keyboardFrameContainer.dataset.transitionIn = 'true';
+    }
 
     // XXX Keyboard transition may be affected by window.open event,
     // and thus the keyboard looks like jump into screen.
@@ -468,8 +493,12 @@ var KeyboardManager = {
           onTransitionEnd);
 
       delete self.keyboardFrameContainer.dataset.transitionIn;
-      self._debug('keyboard display transitionend');
+      self._debug('showKeyboard display transitionend');
 
+      // keyboard is now hidden?
+      if (self.keyboardFrameContainer.classList.contains('hide')) {
+        return;
+      }
       if (callback) {
         callback();
       }
@@ -523,10 +552,45 @@ var KeyboardManager = {
   },
 
   hideKeyboard: function km_hideKeyboard() {
-    this.resetShowingKeyboard();
+    var self = this;
+    var onTransitionEnd = function(evt) {
+      if (evt.propertyName !== 'transform') {
+        return;
+      }
+      self.keyboardFrameContainer.removeEventListener('transitionend',
+        onTransitionEnd);
+
+      self._debug('hideKeyboard display transitionend');
+
+      // prevent destroying the keyboard when we're not hidden anymore
+      if (!self.keyboardFrameContainer.classList.contains('hide')) {
+        return;
+      }
+
+      self.resetShowingKeyboard();
+    };
+    this.keyboardFrameContainer.addEventListener('transitionend',
+      onTransitionEnd);
+
     this.keyboardHeight = 0;
     window.dispatchEvent(new CustomEvent('keyboardhide'));
     this.keyboardFrameContainer.classList.add('hide');
+  },
+
+  hideKeyboardImmediately: function km_hideImmediately() {
+    this.keyboardHeight = 0;
+    window.dispatchEvent(new CustomEvent('keyboardhide'));
+
+    var keyboard = this.keyboardFrameContainer;
+    keyboard.classList.add('notransition');
+    keyboard.classList.add('hide');
+    // Trigger reflow, because the class changes will be grouped
+    // and the notransition has no effect
+    keyboard.offsetHeight;
+
+    // after reflow it's safe to remove the class again
+    keyboard.classList.remove('notransition');
+    this.resetShowingKeyboard();
   },
 
   switchToNext: function km_switchToNext() {

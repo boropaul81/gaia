@@ -61,36 +61,34 @@ var Settings = {
       window.scrollTo(0, 0);
     }
 
-    window.addEventListener('transitionend', function paintWait() {
-      window.removeEventListener('transitionend', paintWait);
+    newPanel.addEventListener('transitionend', function paintWait() {
+      newPanel.removeEventListener('transitionend', paintWait);
 
       // We need to wait for the next tick otherwise gecko gets confused
       setTimeout(function nextTick() {
+        var detail = {
+          previous: oldPanelHash,
+          current: newPanelHash
+        };
+        var event = new CustomEvent('panelready', {detail: detail});
+        window.dispatchEvent(event);
+
         // Bug 818056 - When multiple visible panels are present,
         // they are not painted correctly. This appears to fix the issue.
         // Only do this after the first load
         if (oldPanel.className === 'current')
           return;
 
-        oldPanel.addEventListener('transitionend', function onTransitionEnd(e) {
-          oldPanel.removeEventListener('transitionend', onTransitionEnd);
-          var detail = {
-            previous: oldPanelHash,
-            current: newPanelHash
-          };
-          var event = new CustomEvent('panelready', {detail: detail});
-          window.dispatchEvent(event);
-          switch (newPanel.id) {
-            case 'about-licensing':
-              // Workaround for bug 825622, remove when fixed
-              var iframe = document.getElementById('os-license');
-              iframe.src = iframe.dataset.src;
-              break;
-            case 'wifi':
-              PerformanceTestingHelper.dispatch('settings-panel-wifi-visible');
-              break;
-          }
-        });
+        switch (newPanel.id) {
+          case 'about-licensing':
+            // Workaround for bug 825622, remove when fixed
+            var iframe = document.getElementById('os-license');
+            iframe.src = iframe.dataset.src;
+            break;
+          case 'wifi':
+            PerformanceTestingHelper.dispatch('settings-panel-wifi-visible');
+            break;
+        }
       });
     });
   },
@@ -148,7 +146,7 @@ var Settings = {
       if (!input)
         return;
 
-      switch (input.dataset.type || input.type) { // bug344618
+      switch (input.type) {
         case 'checkbox':
         case 'switch':
           if (input.checked == value)
@@ -159,9 +157,6 @@ var Settings = {
           if (input.value == value)
             return;
           input.value = value;
-          if (input.refresh) {
-            input.refresh(); // XXX to be removed when bug344618 lands
-          }
           break;
         case 'select':
           for (var i = 0; i < input.options.length; i++) {
@@ -259,25 +254,25 @@ var Settings = {
     }
     panel.dataset.rendered = true;
 
-    // load the panel and its sub-panels (dependencies)
-    // (load the main panel last because it contains the scripts)
-    var selector = 'section[id^="' + panel.id + '-"]';
-    var subPanels = document.querySelectorAll(selector);
-    for (var i = 0, il = subPanels.length; i < il; i++) {
-      this.loadPanel(subPanels[i]);
+    if (panel.dataset.requireSubPanels) {
+      // load the panel and its sub-panels (dependencies)
+      // (load the main panel last because it contains the scripts)
+      var selector = 'section[id^="' + panel.id + '-"]';
+      var subPanels = document.querySelectorAll(selector);
+      for (var i = 0, il = subPanels.length; i < il; i++) {
+        this.loadPanel(subPanels[i]);
+      }
+      this.loadPanel(panel, this.panelLoaded.bind(this, panel, subPanels));
+    } else {
+      this.loadPanel(panel, this.panelLoaded.bind(this, panel));
     }
-    this.loadPanel(panel, this.panelLoaded.bind(this, panel, subPanels));
   },
 
   panelLoaded: function(panel, subPanels) {
     // panel-specific initialization tasks
     switch (panel.id) {
       case 'display':             // <input type="range"> + brightness control
-        bug344618_polyfill();     // XXX to be removed when bug344618 is fixed
         this.updateDisplayPanel();
-        break;
-      case 'sound':               // <input type="range">
-        bug344618_polyfill();     // XXX to be removed when bug344618 is fixed
         break;
       case 'languages':           // fill language selector
         var langSel = document.querySelector('select[name="language.current"]');
@@ -311,8 +306,10 @@ var Settings = {
     }
 
     // preset all inputs in the panel and subpanels.
-    for (var i = 0; i < subPanels.length; i++) {
-      this.presetPanel(subPanels[i]);
+    if (panel.dataset.requireSubPanels) {
+      for (var i = 0; i < subPanels.length; i++) {
+        this.presetPanel(subPanels[i]);
+      }
     }
     this.presetPanel(panel);
   },
@@ -424,39 +421,8 @@ var Settings = {
         var key = ranges[i].name;
         if (key && result[key] != undefined) {
           ranges[i].value = parseFloat(result[key]);
-          if (ranges[i].refresh) {
-            ranges[i].refresh(); // XXX to be removed when bug344618 lands
-          }
         }
       }
-
-      // use a <button> instead of the <select> element
-      var fakeSelector = function(select) {
-        var parent = select.parentElement;
-        var button = select.previousElementSibling;
-        // link the button with the select element
-        var index = select.selectedIndex;
-        var updateButton = function(selection) {
-          var args = selection.dataset.l10nArgs;
-          var argsObj = args ? JSON.parse(args) : null;
-          if (selection.dataset.l10nId) {
-            localize(button, selection.dataset.l10nId, argsObj);
-          } else {
-            button.textContent = selection.textContent;
-          }
-        };
-
-        if (index >= 0) {
-          var selection = select.options[index];
-          updateButton(selection);
-        }
-        if (parent.classList.contains('fake-select')) {
-          select.addEventListener('change', function() {
-            var newSelection = this.options[this.selectedIndex];
-            updateButton(newSelection);
-          });
-        }
-      };
 
       // preset all select
       var selects = panel.querySelectorAll('select');
@@ -471,7 +437,6 @@ var Settings = {
             selectOption.selected = true;
           }
         }
-        fakeSelector(select);
       }
 
       // preset all span with data-name fields
@@ -544,7 +509,7 @@ var Settings = {
 
   handleEvent: function settings_handleEvent(event) {
     var input = event.target;
-    var type = input.dataset.type || input.type; // bug344618
+    var type = input.type;
     var key = input.name;
 
     var settings = window.navigator.mozSettings;
@@ -626,17 +591,6 @@ var Settings = {
                   break;
                 case 'select-one':
                   input.value = request.result[key] || '';
-                  // Reset the select button content: We have to sync
-                  // the content to value in db before entering dialog
-                  var parent = input.parentElement;
-                  var button = input.previousElementSibling;
-                  // link the button with the select element
-                  var index = input.selectedIndex;
-                  if (index >= 0) {
-                    var selection = input.options[index];
-                    button.textContent = selection.textContent;
-                    button.dataset.l10nId = selection.dataset.l10nId;
-                  }
                   break;
                 default:
                   input.value = request.result[key] || '';
@@ -782,13 +736,8 @@ window.addEventListener('load', function loadSettings() {
   Settings.init();
 
   setTimeout(function nextTick() {
+    LazyLoader.load(['js/utils.js'], startupLocale);
     LazyLoader.load([
-      'js/utils.js',
-      'js/mvvm/models.js',
-      'js/mvvm/views.js'],
-      startupLocale);
-    LazyLoader.load([
-      'shared/js/keyboard_helper.js',
       'js/airplane_mode.js',
       'js/battery.js',
       'shared/js/async_storage.js',

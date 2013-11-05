@@ -2,7 +2,7 @@
 /* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 
 /*global ThreadListUI, ThreadUI, Threads, SMIL, MozSmsFilter, Compose,
-         Utils, LinkActionHandler, Contacts */
+         Utils, LinkActionHandler, Contacts, Attachment */
 /*exported MessageManager */
 
 'use strict';
@@ -10,7 +10,7 @@
 var MessageManager = {
 
   activity: null,
-
+  forward: null,
   init: function mm_init(callback) {
     if (this.initialized) {
       return;
@@ -58,7 +58,10 @@ var MessageManager = {
       ThreadUI.appendMessage(message);
       ThreadUI.forceScrollViewToBottom();
     }
-    MessageManager.getThreads(ThreadListUI.renderThreads);
+
+    MessageManager.getThreads(function() {
+      ThreadListUI.updateThread(message);
+    });
   },
 
   onMessageFailed: function mm_onMessageFailed(e) {
@@ -81,11 +84,11 @@ var MessageManager = {
       return;
     }
 
-    // Here we can only have one sender, so deliveryStatus[0] => message
-    // status from sender. Ignore 'pending' messages that are received
+    // Here we can only have one sender, so deliveryInfo[0].deliveryStatus =>
+    // message status from sender. Ignore 'pending' messages that are received
     // this means we are in automatic download mode
     if (message.delivery === 'not-downloaded' &&
-        message.deliveryStatus[0] === 'pending') {
+        message.deliveryInfo[0].deliveryStatus === 'pending') {
       return;
     }
 
@@ -98,7 +101,7 @@ var MessageManager = {
     if (threadId === Threads.currentId) {
       //Append message and mark as read
       this.markMessagesRead([message.id], function() {
-        MessageManager.getThreads(ThreadListUI.renderThreads);
+        ThreadListUI.updateThread(message);
       });
       ThreadUI.onMessageReceived(message);
     } else {
@@ -110,7 +113,6 @@ var MessageManager = {
     LinkActionHandler.reset();
     ThreadListUI.updateContactsInfo();
     ThreadUI.updateHeaderData();
-    Utils.updateTimeHeaders();
 
     // If we receive a message with screen off, the height is
     // set to 0 and future checks will fail. So we update if needed
@@ -149,58 +151,96 @@ var MessageManager = {
     });
   },
 
-  launchComposer: function mm_openComposer(activity) {
-    // Do we have to handle a pending activity?
+  launchComposer: function mm_launchComposer(callback) {
     ThreadUI.cleanFields(true);
-    Compose.clear();
     this.threadMessages.classList.add('new');
+    this.slide('left', function() {
+      callback && callback();
+    });
+  },
 
-    MessageManager.slide('left', function() {
-      ThreadUI.initRecipients();
-      if (!activity) {
-        return;
-      }
+  handleForward: function mm_handleForward(forward) {
+    if (!forward) {
+      return;
+    }
 
-      /**
-       * Choose the appropriate contact resolver:
-       *  - if we have a phone number and no contact, rely on findByPhoneNumber
-       *    to get a contact matching the number;
-       *  - if we have a contact object and no phone number, just use a dummy
-       *    source that returns the contact.
-       */
-      var findByPhoneNumber = Contacts.findByPhoneNumber.bind(Contacts);
-      var number = activity.number;
-      if (activity.contact && !number) {
-        findByPhoneNumber = function dummySource(contact, cb) {
-          cb(activity.contact);
-        };
-        number = activity.contact.number || activity.contact.tel[0].value;
-      }
+    var request = MessageManager.getMessage(+forward.messageId);
 
-      // Add recipients and fill+focus the Compose area.
-      if (activity.contact && number) {
-        Utils.getContactDisplayInfo(
-          findByPhoneNumber, number, function onData(data) {
-            data.source = 'contacts';
-            ThreadUI.recipients.add(data);
-            ThreadUI.setMessageBody(activity.body);
-          }
-        );
+    request.onsuccess = (function() {
+      var message = request.result;
+      if (message.type === 'sms') {
+        ThreadUI.setMessageBody(message.body);
       } else {
-        if (number) {
-          // If the activity delivered the number of an unknown recipient,
-          // create a recipient directly.
-          ThreadUI.recipients.add({
-            number: number,
-            source: 'manual'
-          });
-        }
-        ThreadUI.setMessageBody(activity.body);
-      }
 
-      // Clean activity object
-      this.activity = null;
-    }.bind(this));
+        SMIL.parse(message, function(parsedArray) {
+          parsedArray.forEach(function(mmsElement) {
+            if (mmsElement.blob) {
+              var attachment = new Attachment(mmsElement.blob, {
+                name: mmsElement.name,
+                isDraft: true
+              });
+              Compose.append(attachment);
+            }
+            if (mmsElement.text) {
+              Compose.append(mmsElement.text);
+            }
+          });
+        });
+      }
+      // Focus en recipients
+      ThreadUI.recipients.focus();
+    }).bind(this);
+
+    request.onerror = function() {
+      console.error('Error while forwarding.');
+    };
+
+    this.forward = null;
+  },
+
+  handleActivity: function mm_handleActivity(activity) {
+    if (!activity) {
+      return;
+    }
+    /**
+     * Choose the appropriate contact resolver:
+     *  - if we have a phone number and no contact, rely on findByPhoneNumber
+     *    to get a contact matching the number;
+     *  - if we have a contact object and no phone number, just use a dummy
+     *    source that returns the contact.
+     */
+    var findByPhoneNumber = Contacts.findByPhoneNumber.bind(Contacts);
+    var number = activity.number;
+    if (activity.contact && !number) {
+      findByPhoneNumber = function dummySource(contact, cb) {
+        cb(activity.contact);
+      };
+      number = activity.contact.number || activity.contact.tel[0].value;
+    }
+
+    // Add recipients and fill+focus the Compose area.
+    if (activity.contact && number) {
+      Utils.getContactDisplayInfo(
+        findByPhoneNumber, number, function onData(data) {
+          data.source = 'contacts';
+          ThreadUI.recipients.add(data);
+          ThreadUI.setMessageBody(activity.body);
+        }
+      );
+    } else {
+      if (number) {
+        // If the activity delivered the number of an unknown recipient,
+        // create a recipient directly.
+        ThreadUI.recipients.add({
+          number: number,
+          source: 'manual'
+        });
+      }
+      ThreadUI.setMessageBody(activity.body);
+    }
+
+    // Clean activity object
+    this.activity = null;
   },
 
   onHashChange: function mm_onHashChange(e) {
@@ -220,7 +260,10 @@ var MessageManager = {
     switch (window.location.hash) {
       case '#new':
         ThreadUI.inThread = false;
-        this.launchComposer(this.activity);
+        MessageManager.launchComposer(function() {
+          this.handleActivity(this.activity);
+          this.handleForward(this.forward);
+        }.bind(this));
         break;
       case '#thread-list':
         ThreadUI.inThread = false;
@@ -235,6 +278,9 @@ var MessageManager = {
           // Clear it before sliding.
           ThreadUI.container.textContent = '';
           MessageManager.slide('right', function() {
+            // When going to Messaging App, being in a thread, from
+            // a notification, we go directly to the thread, no to the
+            // composer.
             if (self.activity && self.activity.threadId) {
               window.location.hash = '#thread=' + self.activity.threadId;
               self.activity = null;
@@ -283,7 +329,8 @@ var MessageManager = {
     }
 
   },
-
+  // TODO: Optimize this method. Tracked:
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=929919
   getThreads: function mm_getThreads(callback, extraArg) {
     var cursor = this._mozMobileMessage.getThreads(),
         threads = [];
@@ -403,7 +450,7 @@ var MessageManager = {
       };
 
       request.onerror = function onError(event) {
-        console.log('Error Sending: ' + JSON.stringify(event.target.error));
+        console.error('Error Sending: ' + JSON.stringify(event.target.error));
         onerror && onerror(event.target.error);
 
         requestResult.hasError = true;

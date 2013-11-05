@@ -471,6 +471,7 @@ var StatusBar = {
         return;
 
       var voice = conn.voice;
+      var data = conn.data;
       var icon = this.icons.signal;
       var flightModeIcon = this.icons.flightMode;
       var _ = navigator.mozL10n.get;
@@ -495,6 +496,14 @@ var StatusBar = {
         // "Carrier" / "Carrier (Roaming)"
         icon.dataset.level = Math.ceil(voice.relSignalStrength / 20); // 0-5
         icon.dataset.roaming = voice.roaming;
+
+        delete icon.dataset.emergency;
+        delete icon.dataset.searching;
+      } else if (data && data.connected && data.type.startsWith('evdo')) {
+        // "Carrier" / "Carrier (Roaming)" (EVDO)
+        // Show signal strength of data call as EVDO only supports data call.
+        icon.dataset.level = Math.ceil(data.relSignalStrength / 20); // 0-5
+        icon.dataset.roaming = data.roaming;
 
         delete icon.dataset.emergency;
         delete icon.dataset.searching;
@@ -536,10 +545,10 @@ var StatusBar = {
         if (this.cdmaTypes[data.type]) {
           // If the current data connection is CDMA types, we need to check
           // if there exist any calls. If yes, we have to set the status text
-          // to "1x".
+          // to empty.
           var telephony = window.navigator.mozTelephony;
           if (telephony.calls && telephony.calls.length > 0) {
-            icon.textContent = this.mobileDataIconTypes['1xrtt'];
+            icon.textContent = '';
           } else {
             icon.textContent = type;
           }

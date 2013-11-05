@@ -37,8 +37,8 @@
     "audio-channel-notification":{},
     "audio-channel-content":{},
     "cellbroadcast":{},
-    "keyboard":{},
-    "inputmethod-manage":{}
+    "input":{},
+    "input-manage":{}
   },
   "locales": {
     "ar": {
@@ -74,6 +74,10 @@
   "connections": {
     "mediacomms": {
       "description": "Communication with media apps for now playing info",
+      "rules": {}
+    },
+    "ftucomms": {
+      "description": "Communicate between communications/ftu and System",
       "rules": {}
     }
   }

@@ -194,7 +194,7 @@ section li.password > label > span {
 section li.password > span {
   position: absolute;
   top: 8.3rem;
-  left: 3rem;
+  left: 4.5rem;
   padding: 0;
   height: 3rem;
   color: #848484;
@@ -312,7 +312,7 @@ section li.password > p {
   height: 2.7rem;
 }
 
-#call li[aria-disabled="true"] .fake-select {
+#call li[aria-disabled="true"] .icon-dialog {
   opacity: 0.6;
   pointer-events: none;
 }

@@ -354,9 +354,7 @@
         'extraIconsData': extraIconsData,
         'callback': function onSave() {
           data.callback && data.callback();
-          Evme.Banner.show('app-install-success', {
-            'name': query
-          });
+          EvmeManager.onAppSavedToHomescreen(query);
         }
       });
     };
@@ -730,9 +728,7 @@
       });
 
       // display system banner
-      Evme.Banner.show('app-install-success', {
-        'name': data.data.name
-      });
+      EvmeManager.onAppSavedToHomescreen(data.data.name);
 
       // analytics
       Evme.EventHandler.trigger(NAME, 'addToHomeScreen', {
@@ -1319,13 +1315,24 @@
       Searcher.cancelRequests();
 
       if (currentResultsManager && data.method === 'Search/apps') {
-        var query =
-          Evme.Searchbar.getElement().value || Evme.Collection.getQuery() || '',
-        textKey =
-          currentResultsManager.hasResults() ? 'apps-has-installed' : 'apps';
+        Evme.Utils.isOnline(function isOnlineCallback(isOnline) {
+          // only show the connection message if we're offline
+          // needed since there are scenarios where the request wasn't sent
+          // even though we ARE online (like expired session for example)
+          if (isOnline) {
+            return;
+          }
 
-        Evme.ConnectionMessage.show(textKey, {
-          'query': query
+          var query =
+            Evme.Searchbar.getElement().value ||
+            Evme.Collection.getQuery() ||
+            '';
+          var textKey =
+            currentResultsManager.hasResults() ? 'apps-has-installed' : 'apps';
+
+          Evme.ConnectionMessage.show(textKey, {
+            'query': query
+          });
         });
       }
     };

@@ -78,7 +78,7 @@ suite('Time functions', function() {
   suite('#dateMath', function() {
     suiteSetup(function() {
       // The timestamp for "Tue Jul 16 2013 06:00:00" GMT
-      this.sixAm = 1373954400000;
+      this.sixAm = new Date(2013, 5, 16, 6).getTime();
       // Set clock so calls to new Date() and Date.now() will not vary
       // across test locales
       this.dat = new Date(this.sixAm + 15120000);
@@ -621,6 +621,35 @@ suite('Time functions', function() {
 
           test(title, function() {
             assert.equal(hms.apply(null, args), expect);
+          });
+        });
+      });
+    });
+    suite('durationMs()', function() {
+      var durationMs;
+
+      suiteSetup(function() {
+        durationMs = Utils.format.durationMs;
+      });
+
+      suite('duration(ms) ', function() {
+        var fixtures = [
+          { args: [0], expect: '00:00.00' },
+          { args: [10], expect: '00:00.01' },
+          { args: [970], expect: '00:00.97' },
+          { args: [1000 + 670], expect: '00:01.67' },
+          { args: [59000 + 670], expect: '00:59.67' },
+          { args: [60000 + 670], expect: '01:00.67' },
+          { args: [3600 * 1000 + 23000 + 670], expect: '60:23.67' },
+          { args: [2 * 3600 * 1000 + 23000 + 670], expect: '120:23.67' }
+        ];
+
+        fixtures.forEach(function(fixture) {
+          var { args, expect } = fixture;
+          var title = args.map(String).join(', ') + ' => ' + expect + ' ';
+
+          test(title, function() {
+            assert.equal(durationMs.apply(null, args), expect);
           });
         });
       });

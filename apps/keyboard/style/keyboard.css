@@ -49,6 +49,10 @@ button::-moz-focus-inner {
   text-align: center;
 }
 
+#keyboard.full-candidate-panel button.keyboard-key {
+  visibility: hidden;
+}
+
 /* Buttons: logic keys */
 .keyboard-key {
   -moz-box-sizing: border-box;
@@ -204,6 +208,22 @@ button::-moz-focus-inner {
   color: #ccc;
   font: 500 1.5rem/3.9rem 'Keyboard Symbols', sans-serif;
   border-color: #6a6c6e;
+}
+
+/* For disabled keys */
+.keyboard-key.special-key[disabled="true"] {
+  /* Without this rule, the focus would lose when the user clicks this key. 
+     This seems to be because a disabled key would not get touch/click event. */
+  pointer-events: none;
+}
+
+.keyboard-key.special-key[disabled="true"] > .visual-wrapper {
+  border-color: #535757;
+  background-color:  #585D5D;
+}
+
+.keyboard-key.special-key[disabled="true"] > .visual-wrapper > span {
+  color: #888;
 }
 
 /* Special keys - text */

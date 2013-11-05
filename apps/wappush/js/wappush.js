@@ -23,17 +23,9 @@ var WapPushManager = {
   /** Close button node */
   _closeButton: null,
 
-  /** Title of the message, usually holds the sender's number */
-  _title: null,
-
-  /** Message container */
-  _container: null,
-
-  /** Message text */
-  _text: null,
-
-  /** Message link */
-  _link: null,
+  /** Callback function to be invoqued when closing the app from either mode
+    * CP or SI/SL */
+  _onCloseCallback: null,
 
   /**
    * Initialize the WAP Push manager, this only subscribes to the
@@ -67,21 +59,17 @@ var WapPushManager = {
 
     // Retrieve the various page elements
     this._closeButton = document.getElementById('close');
-    this._title = document.getElementById('title');
-    this._container = document.getElementById('wappush-container');
-    this._text = this._container.querySelector('p');
-    this._link = this._container.querySelector('a');
+
+    // Init screen helpers
+    SiSlScreenHelper.init();
+    CpScreenHelper.init();
 
     // Event handlers
+    this._closeButton.addEventListener('click', this.onClose.bind(this));
+
     document.addEventListener(
       'visibilitychange',
       this.onVisibilityChange.bind(this)
-    );
-
-    this._closeButton.addEventListener('click', this.onClose.bind(this));
-    this._link.addEventListener(
-      'click',
-      LinkActionHandler.onClick.bind(LinkActionHandler)
     );
 
     window.navigator.mozSetMessageHandler('notification',
@@ -96,13 +84,6 @@ var WapPushManager = {
   },
 
   /**
-   * Closes the application
-   */
-  onClose: function wpm_onClose() {
-    this.close();
-  },
-
-  /**
    * Establish if we must show this message or not; the message is shown only
    * if WAP Push functionality is enabled, the sender's MSISDN is whitelisted
    * or whitelisting is disabled
@@ -112,13 +93,17 @@ var WapPushManager = {
    * @return {Boolean} true if the message should be displayed, false otherwise.
    */
   shouldDisplayMessage: function wpm_shouldDisplayMessage(message) {
-    if (!this._wapPushEnabled || (message === null) ||
-        !WhiteList.has(message.sender)) {
-       /* WAP push functionality is either completely disabled or the message
-        * comes from a non white-listed MSISDN, ignore it. */
+    if (!this._wapPushEnabled || (message === null)) {
+       /* WAP push functionality is either completely disabled, ignore it. */
        return false;
     }
 
+    if ((message.type !== 'text/vnd.wap.connectivity-xml') &&
+        (!WhiteList.has(message.sender) || message.isExpired())) {
+      /* The message isn't a provisioning message and comes from a non
+       * white-listed MSISDN or it has already been expired, ignore it. */
+      return false;
+    }
     return true;
   },
 
@@ -130,7 +115,6 @@ var WapPushManager = {
    * @param {Object} wapMessage The WAP Push message as provided by the system.
    */
   onWapPushReceived: function wpm_onWapPushReceived(wapMessage) {
-    var self = this;
     var message = ParsedMessage.from(wapMessage, Date.now());
 
     if (!this.shouldDisplayMessage(message)) {
@@ -139,36 +123,43 @@ var WapPushManager = {
     }
 
     message.save(
-      function wpm_saveSuccess() {
+      (function wpm_saveSuccess(status) {
+        if ((status !== 'new') && (status !== 'updated')) {
+          return;
+        }
+
         var req = navigator.mozApps.getSelf();
 
-        req.onsuccess = function wpm_gotApp(event) {
+        req.onsuccess = (function wpm_gotApp(event) {
           var _ = navigator.mozL10n.get;
           var app = event.target.result;
           /* We store the message timestamp as a parameter to be able to
            * retrieve the message from the notification code */
           var iconURL = NotificationHelper.getIconURI(app) +
                        '?timestamp=' + encodeURIComponent(message.timestamp);
+
+          message.text = (message.type == 'text/vnd.wap.connectivity-xml') ?
+                         _(message.text) : message.text;
           var text = message.text ? (message.text + ' ') : '';
 
           text += message.href ? message.href : '';
 
           NotificationHelper.send(message.sender, text, iconURL,
-            function wpm_notificationOnClick() {
+            (function wpm_notificationOnClick() {
               app.launch();
-              self.displayWapPushMessage(message.timestamp);
-            });
+              this.displayWapPushMessage(message.timestamp);
+            }).bind(this));
 
-          self.close(/* background */ true);
-        };
-        req.onerror = function wpm_getAppError() {
-          self.close(/* background */ true);
-        };
-      },
-      function wpm_saveError(error) {
+          this.close(/* background */ true);
+        }).bind(this);
+        req.onerror = (function wpm_getAppError() {
+          this.close(/* background */ true);
+        }).bind(this);
+      }).bind(this),
+      (function wpm_saveError(error) {
         console.log('Could not add a message to the database: ' + error + '\n');
-        self.close(/* background */ true);
-      }
+        this.close(/* background */ true);
+      }).bind(this)
     );
   },
 
@@ -200,12 +191,19 @@ var WapPushManager = {
     var self = this;
     var message = ParsedMessage.load(timestamp,
       function wpm_loadSuccess(message) {
-        // Populate the message
-        self._title.textContent = message.sender;
-        self._text.textContent = message.text;
-        self._link.textContent = message.href;
-        self._link.href = message.href;
-        self._link.dataset.url = message.href;
+        if (message) {
+          switch (message.type) {
+            case 'text/vnd.wap.si':
+            case 'text/vnd.wap.sl':
+              SiSlScreenHelper.populateScreen(message);
+              break;
+            case 'text/vnd.wap.connectivity-xml':
+              CpScreenHelper.populateScreen(message);
+              break;
+          }
+        } else {
+          SiSlScreenHelper.populateScreen(message);
+        }
       },
       function wpm_loadError(error) {
         console.log('Could not retrieve the message:' + error + '\n');
@@ -228,6 +226,28 @@ var WapPushManager = {
     } else {
       window.setTimeout(window.close);
     }
+  },
+
+  /**
+   * Invoque the callback function that handles the applicaton flow in the
+   * different mode (SI/SL or CP) and close the app.
+   */
+  onClose: function wpm_onClose() {
+    if (this._onCloseCallback &&
+        (typeof this._onCloseCallback === 'function')) {
+      this._onCloseCallback();
+    }
+  },
+
+  /**
+   * Set the callback function that handles the applicaton flow in the different
+   * mode (SI/SL or CP) when the user tries to close the application with the
+   * close button.
+   *
+   * @param {function} callback The callback function.
+   */
+  setOnCloseCallback: function wpm_setOnCloseCallback(callback) {
+    this._onCloseCallback = callback;
   }
 };
 

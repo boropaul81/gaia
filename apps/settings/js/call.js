@@ -487,14 +487,6 @@ var Calls = (function(window, document, undefined) {
       }
 
       input.value = value;
-      var parent = input.parentElement;
-      var button = input.previousElementSibling;
-      var index = input.selectedIndex;
-      if (index >= 0) {
-        var selection = input.options[index];
-        button.textContent = selection.textContent;
-        button.dataset.l10nId = selection.dataset.l10nId;
-      }
 
       if (callback) {
         callback(null);
@@ -692,8 +684,15 @@ var Calls = (function(window, document, undefined) {
          return;
        }
        var voicemail = navigator.mozVoicemail;
-       if (voicemail && voicemail.number) {
-         element.textContent = voicemail.number;
+       if (voicemail) {
+         // TODO: remove this backward compatibility check
+         // after bug-814634 is landed
+         var number = voicemail.number ||
+           voicemail.getNumber && voicemail.getNumber();
+
+         if (number) {
+           element.textContent = number;
+         }
          return;
        }
        element.textContent = _('voiceMail-number-notSet');
@@ -713,8 +712,15 @@ var Calls = (function(window, document, undefined) {
       // If the voicemail number has not been stored into the database yet we
       // check whether the number is provided by the mozVoicemail API. In that
       // case we store it into the setting database.
-      if (!number && voicemail && voicemail.number) {
-        setToSettingsDB('ril.iccInfo.mbdn', voicemail.number, null);
+      if (!number && voicemail) {
+         // TODO: remove this backward compatibility check
+         // after bug-814634 is landed
+        var voicemailNumber = voicemail.number ||
+          voicemail.getNumber && voicemail.getNumber();
+
+        if (voicemailNumber) {
+          setToSettingsDB('ril.iccInfo.mbdn', voicemailNumber, null);
+        }
         return;
       }
       updateVoiceMailItemState();

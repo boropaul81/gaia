@@ -9,6 +9,7 @@ requireApp('communications/dialer/test/unit/mock_l10n.js');
 requireApp('communications/dialer/test/unit/mock_contacts.js');
 requireApp('communications/dialer/test/unit/mock_tone_player.js');
 requireApp('communications/dialer/test/unit/mock_swiper.js');
+requireApp('communications/dialer/test/unit/mock_bluetooth_helper.js');
 requireApp('communications/shared/test/unit/mocks/mock_settings_listener.js');
 requireApp('sms/shared/test/unit/mocks/mock_settings_url.js');
 
@@ -26,7 +27,8 @@ var mocksHelperForCallsHandler = new MocksHelper([
   'Contacts',
   'TonePlayer',
   'SettingsURL',
-  'Swiper'
+  'Swiper',
+  'BluetoothHelper'
 ]).init();
 
 suite('calls handler', function() {
@@ -609,6 +611,13 @@ suite('calls handler', function() {
             CallsHandler.holdAndAnswer();
             assert.equal(MockCallScreen.mCdmaCallWaiting, true);
           });
+
+          test('should inform bluetooth of answering second call', function() {
+            var switchCallsSpy = this.sinon.spy(
+              MockBluetoothHelperInstance, 'answerWaitingCall');
+            CallsHandler.holdAndAnswer();
+            assert.equal(switchCallsSpy.calledOnce, true);
+          });
       });
     });
 
@@ -655,7 +664,7 @@ suite('calls handler', function() {
 
           test('should hide the call waiting UI', function() {
             var hideSpy = this.sinon.spy(MockCallScreen, 'hideIncoming');
-            CallsHandler.holdAndAnswer();
+            CallsHandler.endAndAnswer();
             assert.isTrue(hideSpy.calledOnce);
           });
       });
@@ -700,19 +709,26 @@ suite('calls handler', function() {
 
           test('should invoke hold to answer the second call', function() {
             var holdSpy = this.sinon.spy(mockCall, 'hold');
-            CallsHandler.holdAndAnswer();
+            CallsHandler.endAndAnswer();
             assert.isTrue(holdSpy.calledOnce);
           });
 
           test('should hide the call waiting UI', function() {
             var hideSpy = this.sinon.spy(MockCallScreen, 'hideIncoming');
-            CallsHandler.holdAndAnswer();
+            CallsHandler.endAndAnswer();
             assert.isTrue(hideSpy.calledOnce);
           });
 
           test('should enable the CDMA call waiting UI', function() {
-            CallsHandler.holdAndAnswer();
+            CallsHandler.endAndAnswer();
             assert.equal(MockCallScreen.mCdmaCallWaiting, true);
+          });
+
+          test('should inform bluetooth of answering second call', function() {
+            var switchCallsSpy = this.sinon.spy(
+              MockBluetoothHelperInstance, 'answerWaitingCall');
+            CallsHandler.endAndAnswer();
+            assert.equal(switchCallsSpy.calledOnce, true);
           });
       });
 
@@ -806,6 +822,13 @@ suite('calls handler', function() {
         CallsHandler.ignore();
         assert.isTrue(hideSpy.calledOnce);
       });
+
+      test('should inform bluetooth of ignoring', function() {
+        var ignoreSpy = this.sinon.spy(
+          MockBluetoothHelperInstance, 'ignoreWaitingCall');
+        CallsHandler.ignore();
+        assert.isTrue(ignoreSpy.calledOnce);
+      });
     });
 
     suite('> CallsHandler.toggleCalls()', function() {
@@ -886,6 +909,13 @@ suite('calls handler', function() {
           var holdSpy = this.sinon.spy(mockCall, 'hold');
           CallsHandler.toggleCalls();
           assert.isTrue(holdSpy.calledOnce);
+        });
+
+        test('should inform bluetooth of toggling calls', function() {
+          var btToggleSpy = this.sinon.spy(
+            MockBluetoothHelperInstance, 'toggleCalls');
+          CallsHandler.toggleCalls();
+          assert.isTrue(btToggleSpy.calledOnce);
         });
       });
 
@@ -1033,7 +1063,7 @@ suite('calls handler', function() {
     });
   });
 
-  suite('> headphone support', function() {
+  suite('> headphone and bluetooth support', function() {
     var realACM;
     var acmStub;
 
@@ -1063,6 +1093,15 @@ suite('calls handler', function() {
       test('should turn the speakerOff', function() {
         var turnOffSpy = this.sinon.spy(MockCallScreen, 'turnSpeakerOff');
         headphonesChange.yield();
+        assert.isTrue(turnOffSpy.calledOnce);
+      });
+    });
+
+    suite('> connecting to bluetooth headset', function() {
+      test('should turn the speakerOff when connected', function() {
+        CallsHandler.setup();
+        var turnOffSpy = this.sinon.spy(MockCallScreen, 'turnSpeakerOff');
+        MockBluetoothHelperInstance.onscostatuschanged({status: true});
         assert.isTrue(turnOffSpy.calledOnce);
       });
     });

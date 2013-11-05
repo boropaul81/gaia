@@ -1,8 +1,6 @@
 /* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
 /* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 
-/*global FixedHeader */
-
 (function(exports) {
   'use strict';
   var rdashes = /-(.)/g;
@@ -20,56 +18,6 @@
         // without creating race conditions or hard script dependencies
         return (Utils.date.format = new navigator.mozL10n.DateTimeFormat());
       }
-    },
-    updateTimeHeaders: function ut_updateTimeHeaders() {
-      var headers = document.querySelectorAll('header[data-time-update]'),
-          length = headers.length, i;
-
-      for (i = 0; i < length; i++) {
-        Utils.updateTimeHeader(headers[i]);
-      }
-
-      FixedHeader.updateHeaderContent();
-    },
-
-    updateTimeHeader: function ut_updateTimeHeader(header) {
-      var ts = header.dataset.time;
-      if (!ts) {
-        return;
-      }
-
-      var newHeader;
-
-      // only date
-      if (header.dataset.isThread === 'true') {
-        newHeader = Utils.getHeaderDate(ts);
-
-      // only time
-      } else if (header.dataset.timeOnly === 'true') {
-        newHeader = Utils.getFormattedHour(ts);
-
-      // date + time
-      } else {
-        newHeader = Utils.getHeaderDate(ts) + ' ' + Utils.getFormattedHour(ts);
-      }
-
-      if (newHeader !== header.textContent) {
-        header.textContent = newHeader;
-      }
-    },
-
-    startTimeHeaderScheduler: function ut_startTimeHeaderScheduler() {
-      var updateFunction = (function() {
-        this.updateTimeHeaders();
-        var now = Date.now(),
-            nextTimeout = new Date(now + 60000);
-        nextTimeout.setSeconds(0);
-        nextTimeout.setMilliseconds(0);
-        clearTimeout(this.updateTimer);
-        this.updateTimer = setTimeout(updateFunction,
-          nextTimeout.getTime() - now);
-      }).bind(this);
-      updateFunction();
     },
     escapeRegex: function ut_escapeRegex(str) {
       if (typeof str !== 'string') {
@@ -452,43 +400,50 @@
     */
     getContactDisplayInfo: function(resolver, phoneNumber, callback) {
       resolver(phoneNumber, function onContacts(contacts) {
-        var contact;
-        if (Array.isArray(contacts)) {
-          if (contacts.length > 0) {
-            contact = contacts[0];
-          }
-        } else if (contacts !== null) {
-          contact = contacts;
-        }
-
-        // Only exit when no contact and no phone number case.
-        if (!contact && !phoneNumber) {
-          callback(null);
-          return;
-        }
-
-        var telLength = (contact && contact.tel) ? contact.tel.length : 0;
-        var tel;
-        // Look for the right tel. A contact can contains more than
-        // one contact, so we need to identify which one is the right one.
-        for (var i = 0; i < telLength; i++) {
-          if (contact.tel[i].value === phoneNumber) {
-            tel = contact.tel[i];
-            break;
-          }
-        }
-        // If after looking there is no tel. matching, we apply
-        // directly the phoneNumber
-        if (!tel) {
-          tel = {type: [''], value: phoneNumber, carrier: ''};
-        }
-        // Get the title in the standard way
-        var details = Utils.getContactDetails(tel, contact);
-        var info = Utils.getDisplayObject(details.title || null, tel);
-
-        callback(info);
+        callback(Utils.basicContact(phoneNumber, contacts));
       });
     },
+
+    basicContact: function(number, records, callback) {
+      var record;
+      if (Array.isArray(records)) {
+        if (records.length > 0) {
+          record = records[0];
+        }
+      } else if (records !== null) {
+        record = records;
+      }
+
+      // Only exit when no record and no phone number case.
+      if (!record && !number) {
+        if (typeof callback === 'function') {
+          callback(null);
+        }
+        return;
+      }
+
+      var telLength = (record && record.tel) ? record.tel.length : 0;
+      var tel;
+      // Look for the right tel. A record can contains more than
+      // one record, so we need to identify which one is the right one.
+      for (var i = 0; i < telLength; i++) {
+        if (record.tel[i].value === number) {
+          tel = record.tel[i];
+          break;
+        }
+      }
+      // If after looking there is no tel. matching, we apply
+      // directly the number
+      if (!tel) {
+        tel = {type: [''], value: number, carrier: ''};
+      }
+      // Get the title in the standard way
+      var details = Utils.getContactDetails(tel, record);
+      var info = Utils.getDisplayObject(details.title || null, tel);
+
+      return info;
+    },
+
     /*
       Given a title for a contact, a the current information for
       an specific phone, of that contact, creates an object with

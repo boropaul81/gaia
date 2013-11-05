@@ -39,10 +39,25 @@
         obj.href = this.href;
       }
 
+      if (this.id) {
+        obj.id = this.id;
+      }
+
+      if (this.created) {
+        obj.created = this.created;
+      }
+
+      if (this.expires) {
+        obj.expires = this.expires;
+      }
+
       if (this.text) {
         obj.text = this.text;
       }
 
+      if (this.provisioning) {
+        obj.provisioning = this.provisioning;
+      }
       return obj;
     },
 
@@ -57,6 +72,13 @@
      */
     save: function pm_save(success, error) {
       MessageDB.put(this.toJSON(), success, error);
+    },
+
+    /**
+     * Returns true if the message has already expired
+     */
+    isExpired: function pm_isExpired() {
+      return (this.expires && (this.expires < Date.now()));
     }
   };
 
@@ -68,6 +90,10 @@
    * - sender: the sender of this message, a MSISDN
    * - timestamp: a timestamp taken when parsing the object
    * - href: optional for SI messages, required for SL, a URL to be displayed
+   * - id: optional for SI messages, a pseudo-unique ID for the message
+   * - created: optional for SI messages, creation time of this message
+   * - expires: optional for SI messages, expiration time of this message
+   * - provisioning: only for CP messages, CP related object
    * - text: optional, text to be displayed
    *
    * @param {Object} message A WAP Push message as delivered by the system.
@@ -97,12 +123,44 @@
       }
 
       obj.text = indicationNode.textContent;
+
+      // 'si-id' attribute, optional, string
+      if (indicationNode.hasAttribute('si-id')) {
+        obj.id = indicationNode.getAttribute('si-id');
+      } else if (obj.href) {
+        /* WAP-167 5.2.1: If the 'si-id' attribute is not specified, its value
+         * is considered to be the same as the value of the 'href' attribute */
+        obj.id = obj.href;
+      }
+
+      // 'created' attribute, optional, date in ISO 8601 format
+      if (indicationNode.hasAttribute('created')) {
+        var date = new Date(indicationNode.getAttribute('created'));
+
+        obj.created = date.getTime();
+      }
+
+      // 'si-expires' attribute, optional, date in ISO 8601 format
+      if (indicationNode.hasAttribute('si-expires')) {
+        var expiresDate = new Date(indicationNode.getAttribute('si-expires'));
+
+        obj.expires = expiresDate.getTime();
+      }
     } else if (message.contentType === 'text/vnd.wap.sl') {
       // SL message
       var slNode = doc.querySelector('sl');
 
       // 'href' attribute, always present
       obj.href = slNode.getAttribute('href');
+    } else if (message.contentType === 'text/vnd.wap.connectivity-xml') {
+      // Client provisioning (CP) message
+      obj.provisioning = Provisioning.fromMessage(message);
+      // Security information is mandatory for the application. The application
+      // must discard any message with no security information.
+      if (!obj.provisioning.authInfo) {
+        return null;
+      }
+      obj.text = 'cp-message-received';
     } else {
       return null;
     }

@@ -42,8 +42,6 @@ var ActivityHandler = {
     } else {
       console.error('Unrecognized activity: "' + name + '"');
     }
-
-    ThreadUI.enableActivityRequestMode();
   },
 
   // A mapping of MozActivity names to their associated event handler
@@ -82,6 +80,8 @@ var ActivityHandler = {
           contact: contact || null
         });
       });
+
+      ThreadUI.enableActivityRequestMode();
     },
     share: function shareHandler(activity) {
       var blobs = activity.source.data.blobs,
@@ -175,10 +175,10 @@ var ActivityHandler = {
   // Launch the UI properly taking into account the hash
   launchComposer: function ah_launchComposer(activity) {
     if (location.hash === '#new') {
-      MessageManager.launchComposer(activity);
+      MessageManager.handleActivity(activity);
     } else {
-      // Move to new message
       MessageManager.activity = activity;
+      // Move to new message
       window.location.hash = '#new';
     }
   },
@@ -442,9 +442,9 @@ var ActivityHandler = {
     if (message.type === 'sms') {
       dispatchNotification();
     } else {
-      // Here we can only have one sender, so deliveryStatus[0] => message
-      // status from sender.
-      var status = message.deliveryStatus[0];
+      // Here we can only have one sender, so deliveryInfo[0].deliveryStatus =>
+      // message status from sender.
+      var status = message.deliveryInfo[0].deliveryStatus;
       if (status === 'pending') {
         return;
       }
