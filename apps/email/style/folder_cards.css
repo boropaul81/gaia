@@ -40,7 +40,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   -moz-transition-property: transform;
-  -moz-transition-duration: 0.3s;
+  -moz-transition-duration: 0.2s;
   -moz-transition-timing-function: ease;
   -moz-transition-delay: 0;
 }
@@ -114,7 +114,7 @@
 }
 
 .fld-account-item {
-  padding-left: 0;
+  padding-left: 0.5em;
 }
 
 .fld-account-selected {

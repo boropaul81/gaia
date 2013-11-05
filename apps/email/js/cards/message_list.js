@@ -208,6 +208,16 @@ function MessageListCard(domNode, mode, args) {
 
   this._boundOnNewMail = this.onNewMail.bind(this);
   model.on('newInboxMessages', this._boundOnNewMail);
+
+  this.domNode.addEventListener('transitionend', function(evt) {
+    var target = evt.target;
+    if (target.classList.contains('anim-opacity')) {
+      if (window.getComputedStyle(target).opacity === 0) {
+console.log('HERE HIDING TRANSPARENT');
+        target.classList.add('hidden');
+      }
+    }
+  }, false);
 }
 MessageListCard.prototype = {
   /**
@@ -364,7 +374,12 @@ MessageListCard.prototype = {
 
   toggleDrawerShield: function(state) {
     var classList = this.domNode.querySelector('.drawer-shield').classList;
-    classList[state === 'on' ? 'remove' : 'add']('hidden');
+    if (state === 'on') {
+      classList.remove('hidden');
+      classList.remove('transparent');
+    } else {
+      classList.add('transparent');
+    }
   },
 
   onShowFolders: function() {
@@ -374,7 +389,7 @@ console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
       insertBeforeNode: this.domNode.querySelector('.msg-list-header'),
       onPushed: function() {
         this.domNode.querySelector('menu[type="toolbar"]')
-          .classList.add('hidden');
+          .classList.add('transparent');
       }.bind(this)
     });
   },
@@ -837,6 +852,10 @@ console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
         childNode.parentNode.removeChild(childNode);
       }
     }
+
+    // Make sure shield is off too
+    cacheNode.querySelector('.drawer-shield').classList.add('hidden');
+
     htmlCache.saveFromNode(cacheNode);
   },
 
@@ -1125,8 +1144,11 @@ console.log('onShowFolders: ', this.domNode.querySelector('.msg-list-header'));
    * visible card.
    */
   onCardVisible: function() {
-    this.domNode.querySelector('menu[type="toolbar"]')
-      .classList.remove('hidden');
+    var toolbarClassList = this.domNode.querySelector('menu[type="toolbar"]')
+                                       .classList;
+    toolbarClassList.remove('hidden');
+    toolbarClassList.remove('transparent');
+
     this.toggleDrawerShield('off');
 
     if (this._whenVisible) {

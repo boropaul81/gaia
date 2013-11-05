@@ -587,3 +587,8 @@ input.msg-search-text-tease {
   z-index: 9;
 }
 
+.card-message-list .drawer-shield.transparent,
+.card-message-list .drawer-shield.hidden {
+  opacity: 0;
+}
+

@@ -46,7 +46,7 @@ body {
 
 .card.anim-fade {
   -moz-transition-property: opacity;
-  -moz-transition-duration: 1s;
+  -moz-transition-duration: .8s;
   -moz-transition-timing-function: ease;
   -moz-transition-delay: 0;
   transition: translateX(0);
@@ -280,4 +280,16 @@ section[role="status"] .toaster-banner-retry {
 section[role="status"][title="undo"] .toaster-banner-undo,
 section[role="status"][title="retry"] .toaster-banner-retry {
   display: inline;
+}
+
+/* General helpers for opacity transition */
+.anim-opacity {
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 0.6s;
+  -moz-transition-timing-function: ease;
+  -moz-transition-delay: 0;
+}
+
+.transparent {
+  opacity: 0;
 }
