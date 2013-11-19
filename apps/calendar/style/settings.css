@@ -10,8 +10,7 @@ body[data-path^='/week'] #time-views {
 
 body[data-path^='/advanced-settings'] #time-views,
 body[data-path^='/select-preset'] #time-views,
-body[data-path^='/create-account'] #time-views,
-body[data-path^='/settings'] #time-views {
+body[data-path^='/create-account'] #time-views {
   position: relative;
   transform: translateX(80%);
   box-shadow: 0.1rem 0.1rem 0.5rem 0.5rem #222;
@@ -19,13 +18,24 @@ body[data-path^='/settings'] #time-views {
 }
 
 #settings {
+  margin-top: 5rem;
+  width: 100%;
+  height: calc(100% - 10rem);
   font-size: 1.7rem;
   color: white;
-  width: 80%;
-  z-index: 0;
+  z-index: 100;
   visibility: visible;
+  transition: transform 0.5s ease-in-out;
 }
 
+body #settings,
+body[data-path] #settings {
+  transform: translateY(-100%);
+}
+
+body[data-path^='/settings'] #settings {
+  transform: translateY(0);
+}
 
 #settings ol.calendars {
   height: calc(100% - 9rem);
