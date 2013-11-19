@@ -1,4 +1,4 @@
-/*global define */
+/*global define, requestAnimationFrame */
 define(function(require) {
 
 var templateNode = require('tmpl!./folder_picker.html'),
@@ -27,8 +27,12 @@ function FolderPickerCard(domNode, mode, args) {
   domNode.getElementsByClassName('fld-nav-toolbar')[0]
     .addEventListener('click', this.onShowSettings.bind(this), false);
 
+  domNode.getElementsByClassName('fld-header-back')[0]
+    .addEventListener('click', this._closeCard.bind(this), false);
+
   this.foldersHeader = domNode.getElementsByClassName('fld-folders-header')[0];
-  domNode.getElementsByClassName('fld-account-switch-btn')[0]
+
+  domNode.getElementsByClassName('fld-folders-header')[0]
       .addEventListener('click', this.toggleAccounts.bind(this), false);
 
   domNode.addEventListener('click', function(evt) {
@@ -122,10 +126,12 @@ FolderPickerCard.prototype = {
     this.curAccount = accountNode.account;
 
     if (oldAccountId !== accountId) {
-      model.changeAccountFromId(accountId);
+      model.changeAccountFromId(accountId, function() {
+        model.selectInbox(function() {
+          this._closeCard();
+        }.bind(this));
+      }.bind(this));
     }
-
-    this.hideAccounts();
   },
 
   toggleAccounts: function() {
@@ -178,6 +184,25 @@ FolderPickerCard.prototype = {
     } else {
       removeClass(this.domNode, 'one-account');
     }
+
+    // Wait for next animation frame, as by then the DOM should have any
+    // reflows applied from the above DOM insertions.
+    requestAnimationFrame(function() {
+      var height = this.accountsContainer.getBoundingClientRect().height;
+      if (height !== this.currentAccountContainerHeight) {
+        this.currentAccountContainerHeight = height;
+
+        var lastSheet = document.styleSheets[document.styleSheets.length - 1];
+        [
+          '.fld-acct-list-container.closed { transform: translateY(-' +
+                                             height + 'px); }',
+          '.fld-folders-container.closed { transform: translateY(' +
+                                             height + 'px); }'
+        ].forEach(function(rule) {
+          lastSheet.insertRule(rule, lastSheet.cssRules.length);
+        });
+      }
+    }.bind(this));
   },
 
   onAccountsChange: function(account) {
@@ -239,6 +264,9 @@ FolderPickerCard.prototype = {
 
       var depthIdx = Math.min(FOLDER_DEPTH_CLASSES.length - 1, folder.depth);
       folderNode.classList.add(FOLDER_DEPTH_CLASSES[depthIdx]);
+      if (depthIdx > 0) {
+        folderNode.classList.add('fld-folder-depthnonzero');
+      }
 
       folderNode.getElementsByClassName('fld-folder-name')[0]
         .textContent = folder.name;

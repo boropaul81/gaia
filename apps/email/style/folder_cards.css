@@ -1,6 +1,16 @@
+.card-folder-picker .fld-header-placeholder {
+  height: 5rem;
+}
+
+.card-folder-picker .fld-header-placeholder .fld-header-back {
+  width: 3em;
+  height: 3em;
+  background: transparent;
+  border: 0;
+}
+
 .card-folder-picker .fld-folders-header {
   position: relative;
-  margin-top: 5rem;
   clear: both;
   padding: 1rem 0 1rem 1.5rem;
   font-size: 1.7rem;
@@ -36,13 +46,16 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   transition-property: transform;
   transition-duration: 0.2s;
   transition-timing-function: ease;
   transition-delay: 0;
+}
+
+.fld-folders-container {
+  height: 100%;
 }
 
 .fld-acct-list-container.closed {
@@ -82,6 +95,7 @@
   background: white;
   color: black;
   bottom: 5rem;
+  line-height: 4rem;
 }
 
 .card-account-picker {
@@ -152,11 +166,11 @@
 }
 
 .fld-account-switch-btn {
-  background: url(images/icons/arrow_down.png) no-repeat scroll 50% 50% transparent;
+  background: url(images/icons/arrow_up.png) no-repeat scroll 50% 50% transparent;
 }
 
 .fld-folders-header.closed .fld-account-switch-btn {
-  background: url(images/icons/arrow_up.png) no-repeat scroll 50% 50% transparent;
+  background: url(images/icons/arrow_down.png) no-repeat scroll 50% 50% transparent;
 }
 
 .fld-folder-item:last-child {
@@ -184,32 +198,39 @@
   padding-left: 1.5rem;
 }
 .fld-folder-depth1 {
-  padding-left: 3rem;
+  padding-left: 1.5rem;
+  background: url("images/icons/folder_icon.png") 0.1rem left no-repeat;
 }
 .fld-folder-depth2 {
-  padding-left: 4.5rem;
+  padding-left: 3rem;
 }
 .fld-folder-depth3 {
-  padding-left: 6rem;
+  padding-left: 4.5rem;
 }
 .fld-folder-depth4 {
-  padding-left: 6.5rem;
+  padding-left: 6rem;
 }
 .fld-folder-depth5 {
-  padding-left: 9.5rem;
+  padding-left: 6.5rem;
 }
 .fld-folder-depthmax {
-  padding-left: 11rem;
+  padding-left: 9.5rem;
 }
 
-.fld-nav-settings-btn {
-  width: 2rem;
-  margin: 0;
-  background-image: url("images/icons/settings_icon.png") !important;
+.fld-folder-depthnonzero .fld-folder-name {
+  background: url('images/icons/folder_icon.png') center left no-repeat;
+  padding-left: 2.2rem;
 }
 
-.fld-nav-settings-btn:active {
-  background-image: url("images/icons/settings_icon_press.png") !important;
+.fld-settings-link {
+  display: inline-block;
+  height: 4rem;
+  padding-left: 2.2rem;
+  background: url("images/icons/settings_icon.png") center left no-repeat;
+}
+
+.fld-settings-link:active {
+  background: url("images/icons/settings_icon_press.png") center left no-repeat;
 }
 
 .fld-nav-last-synced {
