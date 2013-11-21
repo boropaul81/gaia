@@ -57,6 +57,12 @@ function startup(data, reason) {
     let appsService = Cc['@mozilla.org/AppsService;1'].getService(Ci.nsIAppsService);
     let docShellListener = {
       onStateChange: function onStateChange(webProgress, request, flags, status) {
+        if (!webProgress.chromeEventHandler ||
+             webProgress.chromeEventHandler.tagName != "xul:browser") {
+          // Only set app id for firefox tab <xul:browser> frames
+          return;
+        }
+
         // Catch any load start request
         if (flags & nsIWebProgressListener.STATE_START &&
             flags & nsIWebProgressListener.STATE_IS_DOCUMENT &&
@@ -72,7 +78,7 @@ function startup(data, reason) {
             // test-agent expects its iframes to load apps without any permissions
             // so prevent setting the correct app id to its iframes
             if (!webProgress.DOMWindow || !webProgress.DOMWindow.top ||
-                !webProgress.DOMWindow.top.location.host.startWith("test-agent.gaiamobile.org")) {
+                !webProgress.DOMWindow.top.location.host.startsWith("test-agent.gaiamobile.org")) {
               webProgress.QueryInterface(Ci.nsIDocShell).setIsApp(app.localId);
             }
           }
