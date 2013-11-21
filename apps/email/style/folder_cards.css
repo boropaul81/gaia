@@ -11,10 +11,11 @@
 
 .card-folder-picker .fld-folders-header {
   position: relative;
+  display: block;
   clear: both;
-  padding: 1rem 0 1rem 1.5rem;
+  padding: 0.6rem 0 0.6rem 3rem;
   font-size: 1.7rem;
-  line-height: 2.5rem;
+  line-height: 3rem;
   color: #5f5f5f;
   background: white;
   border-bottom: 0.1rem solid #dadada;
@@ -25,19 +26,21 @@
   padding: 0;
 }
 
+.card-folder-picker.one-account .fld-folders-container {
+  transform: translateY(0);
+  border-top: 0;
+}
+
+
 .card-folder-picker .slot-machine {
   position: relative;
   overflow: hidden;
-  height: calc(100% - 18.5rem);
+  height: calc(100% - 19rem);
   background-color: #e7e7e7;
 }
 
 .card-folder-picker.one-account .slot-machine {
   height: calc(100% - 14rem);
-}
-
-.fld-acct-list-container.closed {
-
 }
 
 .fld-acct-list-container,
@@ -54,26 +57,31 @@
   transition-delay: 0;
 }
 
-.fld-folders-container {
-  height: 100%;
+.fld-acct-list-container {
+  background: #e7e7e7;
 }
 
 .fld-acct-list-container.closed {
-  transform: translateY(-100%);
+
+}
+
+.fld-folders-container {
+  height: 100%;
+  border-top: 1px solid white;
+  background-color: #f4f4f4;
+}
+
+/* Start of JS adjusted values. If modified, also consult folder_picker.js */
+.fld-acct-list-container.closed {
+  transform: translateY(calc(-100% + 2rem));
 }
 
 .fld-acct-list-container {
   transform: translateY(0);
-  padding-bottom: 2em;
 }
 
 .fld-folders-container {
-  padding-top: 1rem;
   background-size: auto auto, 100% 100%;
-}
-
-.card-folder-picker.one-account .fld-folders-container {
-  padding-top: 0;
 }
 
 .fld-folders-container.closed {
@@ -81,7 +89,12 @@
 }
 
 .fld-folders-container {
-  transform: translateY(0);
+  transform: translateY(2rem);
+}
+/* End of JS adjusted values */
+
+.card-folder-picker.one-account .fld-folders-container {
+  padding-top: 0;
 }
 
 .card-folder-picker,
@@ -94,7 +107,7 @@
   text-align: center;
   background: white;
   color: black;
-  bottom: 5rem;
+  bottom: 5.7rem;
   line-height: 4rem;
 }
 
@@ -103,7 +116,7 @@
 
 .fld-arrow {
   position: absolute;
-  right: 1em;
+  right: 1rem;
 }
 
 .fld-accounts-header {
@@ -114,7 +127,7 @@
 
 .fld-account-item, .fld-folder-item, .fld-folder-list-header {
   display: block;
-  line-height: 2.5rem;
+  line-height: 3rem;
   padding: 0.6rem 2rem;
   white-space: nowrap;
   overflow: hidden;
@@ -124,16 +137,13 @@
 
 .fld-folder-item {
   border-bottom: 0.1rem solid #e3e3e3;
-  background-color: #f4f4f4;
 }
 
 .fld-account-item {
-  padding-left: 0.5em;
+  padding-left: 2rem;
+  border-bottom: 0.1rem solid #d7d7d7;
 }
 
-.fld-account-selected {
-  background-color: #fafafa;
-}
 .fld-account-name {
   font-size: 1.7rem;
   padding: 0 1rem;
@@ -150,40 +160,45 @@
   font-size: 1.2rem;
 }
 .fld-folders-header-account-label {
+  display: block;
+  width: calc(100% - 5rem);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.fld-account-switch-btn {
+.fld-account-switch-arrow {
   position: absolute;
-  top: 0.3rem;
-  right: 0;
-  width: 3em;
+  top: 0.6rem;
+  right: 1rem;
+  width: 3rem;
+  height: 3rem;
   border: 0;
-  border-left: 0.1rem solid #e3e3e3;
   color: #5F5F5F;
 }
 
-.fld-account-switch-btn {
+.fld-account-switch-arrow {
   background: url(images/icons/arrow_up.png) no-repeat scroll 50% 50% transparent;
 }
 
-.fld-folders-header.closed .fld-account-switch-btn {
+.fld-folders-header.closed .fld-account-switch-arrow {
   background: url(images/icons/arrow_down.png) no-repeat scroll 50% 50% transparent;
 }
 
 .fld-folder-item:last-child {
   border-bottom: none;
 }
-.fld-folder-item.fld-folder-selected {
-  background-color: #00caf2;
-}
+
 .fld-folder-unselectable {
   color: #858585;
   background-color: #eee;
 }
-.fld-account-item:active, .fld-folder-item:active, .fld-folder-list-header:active {
+
+.fld-folders-header:active,
+.fld-account-item:active,
+.fld-folder-item:active,
+.fld-folder-list-header:active {
+  color: white;
   border-color: #00caf2;
   background: #00caf2;
 }
@@ -195,26 +210,26 @@
 }
 
 .fld-folder-depth0 {
-  padding-left: 1.5rem;
+  padding-left: 3rem;
 }
 .fld-folder-depth1 {
-  padding-left: 1.5rem;
+  padding-left: 3rem;
   background: url("images/icons/folder_icon.png") 0.1rem left no-repeat;
 }
 .fld-folder-depth2 {
-  padding-left: 3rem;
-}
-.fld-folder-depth3 {
   padding-left: 4.5rem;
 }
-.fld-folder-depth4 {
+.fld-folder-depth3 {
   padding-left: 6rem;
 }
+.fld-folder-depth4 {
+  padding-left: 7rem;
+}
 .fld-folder-depth5 {
-  padding-left: 6.5rem;
+  padding-left: 8rem;
 }
 .fld-folder-depthmax {
-  padding-left: 9.5rem;
+  padding-left: 9rem;
 }
 
 .fld-folder-depthnonzero .fld-folder-name {
@@ -225,8 +240,10 @@
 .fld-settings-link {
   display: inline-block;
   height: 4rem;
-  padding-left: 2.2rem;
+  padding-left: 2.4rem;
+  font-size: larger;
   background: url("images/icons/settings_icon.png") center left no-repeat;
+  color: #858585;
 }
 
 .fld-settings-link:active {

@@ -185,19 +185,33 @@ FolderPickerCard.prototype = {
       removeClass(this.domNode, 'one-account');
     }
 
-    // Wait for next animation frame, as by then the DOM should have any
-    // reflows applied from the above DOM insertions.
+    // Wait for a bit since this is non-critical and do not want to disturb the
+    // first animation showing the folder drawer.
     requestAnimationFrame(function() {
       var height = this.accountsContainer.getBoundingClientRect().height;
       if (height !== this.currentAccountContainerHeight) {
         this.currentAccountContainerHeight = height;
 
+        // Get any translateY that is in effect for the folder list, to
+        // maintain that offset after showing the account list.
+        var offset = 20; //getComputedStyle(this.foldersContainer).transform;
+
+        // offset is a matrix string value like matrix(1, 0, 0, 1, 0, 20),
+        // just need the y translation, the last number.
+        //offset  = /matrix\(([^)]+)\)/.exec(offset)[1].split(', ');
+        //offset = parseInt(offset.pop(), 10);
+
+        // Modify the translate offsets so that the account list only moves
+        // as big as its contents. Need to wait for all known accounts to load
+        // to know this for sure, so cannot place it in the CSS file.
+        // However, if you change this section, consult folder_picker.css as
+        // you will likely need to change the styles there too.
         var lastSheet = document.styleSheets[document.styleSheets.length - 1];
         [
           '.fld-acct-list-container.closed { transform: translateY(-' +
                                              height + 'px); }',
           '.fld-folders-container.closed { transform: translateY(' +
-                                             height + 'px); }'
+                                             (height + offset) + 'px); }'
         ].forEach(function(rule) {
           lastSheet.insertRule(rule, lastSheet.cssRules.length);
         });

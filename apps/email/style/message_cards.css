@@ -582,8 +582,10 @@ input.msg-search-text-tease {
   top: 5em;
   width: 100%;
   height: calc(100% - 5em);
-  background: black;
-  opacity: .75;
+  background:
+    url(../shared/style/action_menu/images/ui/pattern.png) repeat left top,
+    url(../shared/style/action_menu/images/ui/gradient.png) no-repeat left top / 100% 100%;
+  opacity: .95;
   z-index: 9;
 }
 
