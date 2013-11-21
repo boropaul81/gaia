@@ -15,7 +15,7 @@
   clear: both;
   padding: 0.6rem 0 0.6rem 3rem;
   font-size: 1.7rem;
-  line-height: 3rem;
+  line-height: 3.8rem;
   color: #5f5f5f;
   background: white;
   border-bottom: 0.1rem solid #dadada;
@@ -35,7 +35,7 @@
 .card-folder-picker .slot-machine {
   position: relative;
   overflow: hidden;
-  height: calc(100% - 19rem);
+  height: calc(100% - 19.8rem);
   background-color: #e7e7e7;
 }
 
@@ -90,6 +90,7 @@
 
 .fld-folders-container {
   transform: translateY(2rem);
+  height: calc(100% - 2rem);
 }
 /* End of JS adjusted values */
 
@@ -127,7 +128,7 @@
 
 .fld-account-item, .fld-folder-item, .fld-folder-list-header {
   display: block;
-  line-height: 3rem;
+  line-height: 3.5rem;
   padding: 0.6rem 2rem;
   white-space: nowrap;
   overflow: hidden;
@@ -172,7 +173,7 @@
   top: 0.6rem;
   right: 1rem;
   width: 3rem;
-  height: 3rem;
+  height: 3.8rem;
   border: 0;
   color: #5F5F5F;
 }
@@ -181,8 +182,16 @@
   background: url(images/icons/arrow_up.png) no-repeat scroll 50% 50% transparent;
 }
 
+.fld-folders-header:active .fld-account-switch-arrow {
+  background: url(images/icons/arrow_up_press.png) no-repeat scroll 50% 50% transparent;
+}
+
 .fld-folders-header.closed .fld-account-switch-arrow {
   background: url(images/icons/arrow_down.png) no-repeat scroll 50% 50% transparent;
+}
+
+.fld-folders-header.closed:active .fld-account-switch-arrow {
+  background: url(images/icons/arrow_down_press.png) no-repeat scroll 50% 50% transparent;
 }
 
 .fld-folder-item:last-child {
@@ -197,7 +206,10 @@
 .fld-folders-header:active,
 .fld-account-item:active,
 .fld-folder-item:active,
-.fld-folder-list-header:active {
+.fld-folder-list-header:active,
+.fld-settings-link:active,
+.fld-nav-toolbar:active,
+.fld-nav-toolbar:active .fld-settings-link {
   color: white;
   border-color: #00caf2;
   background: #00caf2;
@@ -214,8 +226,8 @@
 }
 .fld-folder-depth1 {
   padding-left: 3rem;
-  background: url("images/icons/folder_icon.png") 0.1rem left no-repeat;
 }
+
 .fld-folder-depth2 {
   padding-left: 4.5rem;
 }
@@ -237,6 +249,11 @@
   padding-left: 2.2rem;
 }
 
+.fld-folder-depthnonzero .fld-folder-name:active,
+.fld-folder-depthnonzero:active .fld-folder-name {
+  background: url('images/icons/folder_icon_press.png') center left no-repeat;
+}
+
 .fld-settings-link {
   display: inline-block;
   height: 4rem;
@@ -246,7 +263,8 @@
   color: #858585;
 }
 
-.fld-settings-link:active {
+.fld-settings-link:active,
+.fld-nav-toolbar:active .fld-settings-link {
   background: url("images/icons/settings_icon_press.png") center left no-repeat;
 }
 

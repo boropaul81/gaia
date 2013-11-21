@@ -211,6 +211,8 @@ FolderPickerCard.prototype = {
           '.fld-acct-list-container.closed { transform: translateY(-' +
                                              height + 'px); }',
           '.fld-folders-container.closed { transform: translateY(' +
+                                             (height + offset) + 'px);' +
+                                           ' height: calc(100% - ' +
                                              (height + offset) + 'px); }'
         ].forEach(function(rule) {
           lastSheet.insertRule(rule, lastSheet.cssRules.length);
@@ -229,13 +231,6 @@ FolderPickerCard.prototype = {
     if (firstTime) {
       accountNode.getElementsByClassName('fld-account-name')[0]
         .textContent = account.name;
-    }
-
-    if (account.id === this.curAccount.id) {
-      accountNode.classList.add('fld-account-selected');
-    }
-    else {
-      accountNode.classList.remove('fld-account-selected');
     }
   },
 
