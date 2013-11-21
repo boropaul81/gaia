@@ -147,6 +147,7 @@ body[data-path^='/settings'] #settings.rendered {
 
 #settings-drawer-shield {
   position: absolute;
+  display: block;
   top: 0;
   left: 0;
   width: 100%;

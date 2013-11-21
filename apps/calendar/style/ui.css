@@ -64,6 +64,7 @@ ol.link-list li:only-child a {
 }
 
 body[data-path^='/settings'] #time-header [type="toolbar"] {
+  display: block;
   opacity: 0;
 }
 
