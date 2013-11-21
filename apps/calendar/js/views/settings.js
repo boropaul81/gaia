@@ -35,7 +35,7 @@
       calendars: '#settings .calendars',
       calendarName: '.name',
       syncButton: '#settings .sync',
-      timeViews: '#time-views'
+      drawerShield: '#settings-drawer-shield'
     },
 
     get calendars() {
@@ -46,8 +46,8 @@
       return this._findElement('syncButton');
     },
 
-    get timeViews() {
-      return this._findElement('timeViews');
+    get drawerShield() {
+      return this._findElement('drawerShield', false, document);
     },
 
     _observeUI: function() {
@@ -207,9 +207,15 @@
           if (this.onrender) {
             this.onrender();
           }
+
+          // Wait until settings are fully rendered before
+          // animating their appearance to avoid first time
+          // fps jank.
+          this.element.classList.add('rendered');
         }.bind(this));
       }.bind(this));
     },
+
 
     _updateSyncButton: function(callback) {
       var store = this.app.store('Account');
@@ -237,17 +243,23 @@
      * from the settings tray.
      */
     _hideSettings: function() {
-      this.app.resetState();
+      //this.app.resetState();
     },
 
     onactive: function() {
       _super.onactive.apply(this, arguments);
-      this.timeViews.addEventListener('click', this._hideSettings);
+      // Show the drawer shield. The 'hidden' class is added by
+      // the general anim-opacity transitionend watcher in
+      // app.js
+      this.drawerShield.classList.remove('hidden');
+      requestAnimationFrame(function() {
+        this.drawerShield.classList.remove('disabled');
+      }.bind(this));
     },
 
     oninactive: function() {
       _super.oninactive.apply(this, arguments);
-      this.timeViews.removeEventListener('click', this._hideSettings);
+      this.drawerShield.classList.add('disabled');
     }
 
   };

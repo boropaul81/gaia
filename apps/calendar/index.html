@@ -11,6 +11,7 @@
   <link rel="stylesheet" type="text/css" href="/style/day_views.css">
   <link rel="stylesheet" type="text/css" href="/style/building_blocks.css">
   <link rel="stylesheet" type="text/css" href="/style/first_time_use.css">
+  <link rel="stylesheet" type="text/css" href="/style/settings.css">
 
   <!-- localization -->
   <link rel="resource" type="application/l10n" href="/locales/locales.ini">
@@ -102,7 +103,6 @@
 
 <section is="lazy-styles" id="lazy-styles"></section>
 <section is="errors" id="errors" role="status"></section>
-<section is="settings" class="skin-dark" id="settings" role="region"></section>
 
 <section id="time-views" role="region">
   <header id="time-header">
@@ -110,7 +110,7 @@
       <span class="icon icon-menu">Show Settings</span>
     </button>
 
-    <menu type="toolbar">
+    <menu type="toolbar" class="anim-opacity">
       <a href="/event/add/">
         <span data-l10n-id="new-event" class="icon icon-add" >
           Add Event
@@ -121,6 +121,8 @@
     <h1 id="current-month-year">
     </h1>
   </header>
+
+  <section is="settings" class="skin-dark" id="settings" role="region"></section>
 
   <div id="progress-indicator">
     <div id="throbber"></div>
@@ -157,6 +159,7 @@
     <li class="day" role="tab"><a data-l10n-id="show-day-view" href="/day/">Day</a></li>
   </ul>
 
+  <div id="settings-drawer-shield" class="anim-opacity disabled hidden"></div>
 </section>
 
 <section is="create-account" class="fullscreen-view skin-organic" id="create-account-view" role="region"></section>

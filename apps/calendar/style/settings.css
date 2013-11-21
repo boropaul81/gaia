@@ -24,15 +24,14 @@ body[data-path^='/create-account'] #time-views {
   color: white;
   z-index: 100;
   visibility: visible;
-  transition: transform 0.5s ease-in-out;
+  transition: transform 0.3s ease-in-out;
 }
 
-body #settings,
-body[data-path] #settings {
+body #settings {
   transform: translateY(-100%);
 }
 
-body[data-path^='/settings'] #settings {
+body[data-path^='/settings'] #settings.rendered {
   transform: translateY(0);
 }
 
@@ -144,6 +143,23 @@ body[data-path^='/settings'] #settings {
 
 #settings [role="toolbar"] {
   width: 80% !important;
+}
+
+#settings-drawer-shield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    url(/shared/style/action_menu/images/ui/pattern.png) repeat left top,
+    url(/shared/style/action_menu/images/ui/gradient.png) no-repeat left top / 100% 100%;
+  opacity: .95;
+  z-index: 50;
+}
+
+#settings-drawer-shield.disabled {
+  opacity: 0;
 }
 
 body[role="application"] [role="toolbar"] li button:active {

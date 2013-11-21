@@ -11,11 +11,12 @@ Calendar.ns('Views').TimeHeader = (function() {
       e.stopPropagation();
       var path = window.location.pathname;
       if (SETTINGS.test(path)) {
+        this.toolbar.classList.remove('hidden');
         Calendar.App.resetState();
       } else {
         Calendar.App.router.show('/settings/');
       }
-    });
+    }.bind(this));
   }
 
   TimeHeader.prototype = {
@@ -24,7 +25,8 @@ Calendar.ns('Views').TimeHeader = (function() {
     selectors: {
       element: '#time-header',
       title: '#time-header h1',
-      settings: '#time-header .settings'
+      settings: '#time-header .settings',
+      toolbar: '#time-header menu[type="toolbar"]'
     },
 
     scales: {
@@ -59,6 +61,10 @@ Calendar.ns('Views').TimeHeader = (function() {
 
     get title() {
       return this._findElement('title');
+    },
+
+    get toolbar() {
+      return this._findElement('toolbar');
     },
 
     _scaleEvent: function(event) {

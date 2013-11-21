@@ -368,6 +368,19 @@ Calendar.App = (function(window) {
         firstTimeUse.doFirstTime();
       });
 
+      // wire up general transitionend enhancement to opacity fades.
+      var timeViews = document.querySelector('#time-views');
+      timeViews.addEventListener('transitionend', function transitionEnd(e) {
+        var target = e.target;
+        // For elements that have opacity changed to zero need to
+        // hide them from being clickable.
+        if (target.classList.contains('anim-opacity')) {
+          if (window.getComputedStyle(target).opacity === '0') {
+            target.classList.add('hidden');
+          }
+        }
+      }, false);
+
       setTimeout(function nextTick() {
         this.view('Errors');
       }.bind(this), 0);

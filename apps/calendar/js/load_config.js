@@ -120,9 +120,7 @@ Calendar.LoadConfig = (function() {
         js: [
           'view',
           'views/settings'
-        ],
-
-        style: ['settings']
+        ]
       },
 
       'Views.MonthsDay': {

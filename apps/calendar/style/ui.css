@@ -45,7 +45,7 @@ ol.link-list li:only-child a {
   height: 100%;
 }
 
-#time-views > section {
+#time-views > section.fullscreen-view {
   display: none;
   background: #fff;
   height: calc(100% - 9rem);
@@ -53,6 +53,26 @@ ol.link-list li:only-child a {
 
 #time-views > section.active {
   display: block;
+}
+
+#time-header {
+  z-index: 150;
+}
+
+#time-header [type="toolbar"] {
+  opacity: 1;
+}
+
+body[data-path^='/settings'] #time-header [type="toolbar"] {
+  opacity: 0;
+}
+
+.anim-opacity {
+  transition: opacity 0.6s ease-in-out;
+}
+
+.hidden {
+  display: none;
 }
 
 /* view loading */
