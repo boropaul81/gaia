@@ -11,12 +11,21 @@ Calendar.ns('Views').TimeHeader = (function() {
       e.stopPropagation();
       var path = window.location.pathname;
       if (SETTINGS.test(path)) {
-        this.toolbar.classList.remove('hidden');
-        Calendar.App.resetState();
+        this._resetState();
       } else {
+        // Show the drawer shield. The 'hidden' class is added by
+        // the general anim-opacity transitionend watcher in
+        // app.js
+        this.drawerShield.classList.remove('hidden');
+        requestAnimationFrame(function() {
+          this.drawerShield.classList.remove('disabled');
+        }.bind(this), 100);
+
         Calendar.App.router.show('/settings/');
       }
     }.bind(this));
+
+    this.drawerShield.addEventListener('click', this._resetState.bind(this));
   }
 
   TimeHeader.prototype = {
@@ -26,7 +35,8 @@ Calendar.ns('Views').TimeHeader = (function() {
       element: '#time-header',
       title: '#time-header h1',
       settings: '#time-header .settings',
-      toolbar: '#time-header menu[type="toolbar"]'
+      toolbar: '#time-header menu[type="toolbar"]',
+      drawerShield: '#settings-drawer-shield'
     },
 
     scales: {
@@ -65,6 +75,10 @@ Calendar.ns('Views').TimeHeader = (function() {
 
     get toolbar() {
       return this._findElement('toolbar');
+    },
+
+    get drawerShield() {
+      return this._findElement('drawerShield', false, document);
     },
 
     _scaleEvent: function(event) {
@@ -148,6 +162,17 @@ Calendar.ns('Views').TimeHeader = (function() {
       title.textContent = this.getScale(
         con.scale
       );
+    },
+
+    _resetState: function() {
+      this.toolbar.classList.remove('hidden');
+      requestAnimationFrame(function() {
+        this.toolbar.classList.remove('disabled');
+      }.bind(this));
+
+      this.drawerShield.classList.add('disabled');
+
+      Calendar.App.resetState();
     },
 
     render: function() {

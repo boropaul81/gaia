@@ -15,6 +15,7 @@
     selectors: {
       element: '#advanced-settings-view',
       accountList: '#advanced-settings-view .account-list',
+      createAccountItem: '#advanced-settings-view .create-account-item',
       accountListHeader: '#advanced-settings-view .account-list-header',
       syncFrequency: '#setting-sync-frequency',
 
@@ -24,6 +25,10 @@
 
     get accountList() {
       return this._findElement('accountList');
+    },
+
+    get createAccountItem() {
+      return this._findElement('createAccountItem');
     },
 
     get accountListHeader() {
@@ -123,13 +128,9 @@
         return;
       }
 
-      // Before we add this, ensure that the account list header
-      // is being shown since we could be the first child
-      this.accountListHeader.classList.add('active');
-
-      var idx = this.accountList.children.length;
+      var idx = this.accountList.children.length - 1;
       var item = template.account.render(this._formatModel(model));
-      this.accountList.insertAdjacentHTML('beforeend', item);
+      this.createAccountItem.insertAdjacentHTML('beforebegin', item);
 
       if (model.error) {
         this.accountList.children[idx].classList.add(Calendar.ERROR);
@@ -163,13 +164,6 @@
         /** @type {Node} */
         var parentNode = el.parentNode;
         parentNode.removeChild(el);
-
-        // When we remove this, it's possible that there aren't
-        // any accounts left, so we should check that and possibly
-        // remove the account list header.
-        if (parentNode.childNodes.length === 0) {
-          this.accountListHeader.classList.remove('active');
-        }
       }
     },
 
@@ -189,8 +183,10 @@
       }
 
       function renderAccounts(err, accounts) {
-        self.accountListHeader.classList.remove('active');
-        self.accountList.innerHTML = '';
+        var elements = Array.splice(self.accountList.querySelectorAll('.user'));
+        elements.forEach(function(element) {
+          element.parentChild.removeChild(element);
+        });
 
         for (var id in accounts) {
           self._addAccount(id, accounts[id]);

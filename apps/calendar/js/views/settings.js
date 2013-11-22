@@ -34,23 +34,33 @@
       element: '#settings',
       calendars: '#settings .calendars',
       calendarName: '.name',
-      syncButton: '#settings .sync',
-      drawerShield: '#settings-drawer-shield'
+      toolbar: '#settings [role="toolbar"]',
+      advancedSettingsButton: '#settings .settings',
+      syncButton: '#settings .sync'
     },
 
     get calendars() {
       return this._findElement('calendars');
     },
 
+    get toolbar() {
+      return this._findElement('toolbar');
+    },
+
+    get advancedSettingsButton() {
+      return this._findElement('advancedSettingsButton');
+    },
+
     get syncButton() {
       return this._findElement('syncButton');
     },
 
-    get drawerShield() {
-      return this._findElement('drawerShield', false, document);
-    },
-
     _observeUI: function() {
+      this.advancedSettingsButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        Calendar.App.router.show('/advanced-settings/');
+      });
+
       this.syncButton.addEventListener('click', this._onSyncClick.bind(this));
 
       this.calendars.addEventListener(
@@ -219,16 +229,16 @@
 
     _updateSyncButton: function(callback) {
       var store = this.app.store('Account');
-      var element = this.syncButton;
+      var element = this.toolbar;
       var self = this;
 
       store.syncableAccounts(function(err, list) {
         if (err) return callback(err);
 
         if (list.length === 0) {
-          element.classList.remove(Calendar.ACTIVE);
+          element.classList.add('noaccount');
         } else {
-          element.classList.add(Calendar.ACTIVE);
+          element.classList.remove('noaccount');
         }
 
         // test only event
@@ -248,18 +258,10 @@
 
     onactive: function() {
       _super.onactive.apply(this, arguments);
-      // Show the drawer shield. The 'hidden' class is added by
-      // the general anim-opacity transitionend watcher in
-      // app.js
-      this.drawerShield.classList.remove('hidden');
-      requestAnimationFrame(function() {
-        this.drawerShield.classList.remove('disabled');
-      }.bind(this));
     },
 
     oninactive: function() {
       _super.oninactive.apply(this, arguments);
-      this.drawerShield.classList.add('disabled');
     }
 
   };
