@@ -27,14 +27,14 @@
 }
 
 .card-folder-picker.one-account .fld-folders-container {
-  transform: translateY(0);
   border-top: 0;
 }
 
 
 .card-folder-picker .slot-machine {
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   height: calc(100% - 21.8rem);
   background-color: #e7e7e7;
 }
@@ -45,9 +45,6 @@
 
 .fld-acct-list-container,
 .fld-folders-container {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
@@ -61,38 +58,10 @@
   background: #e7e7e7;
 }
 
-.fld-acct-list-container.closed {
-
-}
-
 .fld-folders-container {
-  height: 100%;
   border-top: 1px solid white;
   background-color: #f4f4f4;
 }
-
-/* Start of JS adjusted values. If modified, also consult folder_picker.js */
-.fld-acct-list-container.closed {
-  transform: translateY(-100%);
-}
-
-.fld-acct-list-container {
-  transform: translateY(0);
-}
-
-.fld-folders-container {
-  background-size: auto auto, 100% 100%;
-}
-
-.fld-folders-container.closed {
-  transform: translateY(100%);
-}
-
-.fld-folders-container {
-  transform: translateY(0);
-  height: 100%;
-}
-/* End of JS adjusted values */
 
 .card-folder-picker.one-account .fld-folders-container {
   padding-top: 0;

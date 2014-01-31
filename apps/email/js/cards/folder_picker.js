@@ -135,7 +135,7 @@ FolderPickerCard.prototype = {
   },
 
   toggleAccounts: function() {
-    if (this.accountsContainer.classList.contains('closed')) {
+    if (this.foldersHeader.classList.contains('closed')) {
       this.showAccounts();
     } else {
       this.hideAccounts();
@@ -143,17 +143,19 @@ FolderPickerCard.prototype = {
   },
 
   showAccounts: function() {
-    addClass(this.foldersContainer, 'closed');
+    this.foldersContainer.style.transform = 'translateY(0)';
+    this.accountsContainer.style.transform = 'translateY(0)';
 
     removeClass(this.foldersHeader, 'closed');
-    removeClass(this.accountsContainer, 'closed');
   },
 
   hideAccounts: function() {
+    var transformValue = 'translateY(-' +
+                         this.currentAccountContainerHeight +
+                         'px)';
+    this.foldersContainer.style.transform = transformValue;
+    this.accountsContainer.style.transform = transformValue;
     addClass(this.foldersHeader, 'closed');
-    addClass(this.accountsContainer, 'closed');
-
-    removeClass(this.foldersContainer, 'closed');
   },
 
   onAccountsSplice: function(index, howMany, addedItems,
@@ -187,31 +189,14 @@ FolderPickerCard.prototype = {
       accountsContainer.insertBefore(accountNode, insertBuddy);
     }.bind(this));
 
-    // Wait for a bit since this is non-critical and do not want to disturb the
-    // first animation showing the folder drawer.
-    requestAnimationFrame(function() {
-      var height = this.accountsContainer.getBoundingClientRect().height;
-      if (height !== this.currentAccountContainerHeight) {
-        this.currentAccountContainerHeight = height;
+    this.currentAccountContainerHeight = this.accountsContainer
+                                         .getBoundingClientRect().height;
+    var transformValue = 'translateY(-' +
+                         this.currentAccountContainerHeight +
+                         'px)';
+    this.accountsContainer.style.transform = transformValue;
 
-        // Modify the translate offsets so that the account list only moves
-        // as big as its contents. Need to wait for all known accounts to load
-        // to know this for sure, so cannot place it in the CSS file.
-        // However, if you change this section, consult folder_picker.css as
-        // you will likely need to change the styles there too.
-        var lastSheet = document.styleSheets[document.styleSheets.length - 1];
-        [
-          '.fld-acct-list-container.closed { transform: translateY(-' +
-                                             height + 'px); }',
-          '.fld-folders-container.closed { transform: translateY(' +
-                                             height + 'px);' +
-                                           ' height: calc(100% - ' +
-                                             height + 'px); }'
-        ].forEach(function(rule) {
-          lastSheet.insertRule(rule, lastSheet.cssRules.length);
-        });
-      }
-    }.bind(this));
+    this.foldersContainer.style.transform = transformValue;
   },
 
   onAccountsChange: function(account) {
