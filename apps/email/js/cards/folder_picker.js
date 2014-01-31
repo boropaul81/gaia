@@ -44,9 +44,15 @@ function FolderPickerCard(domNode, mode, args) {
   this._boundUpdateAccount = this.updateAccount.bind(this);
   model.latest('account', this._boundUpdateAccount);
 
-  this.accountsContainer =
-    domNode.getElementsByClassName('fld-acct-list-container')[0];
-  bindContainerHandler(this.accountsContainer, 'click',
+  this.fldAcctScrollInner =
+    domNode.getElementsByClassName('fld-acct-scrollinner')[0];
+
+  this.fldAcctContainer =
+    domNode.getElementsByClassName('fld-acct-container')[0];
+
+  this.accountListContainer =
+    domNode.getElementsByClassName('fld-accountlist-container')[0];
+  bindContainerHandler(this.accountListContainer, 'click',
                        this.onClickAccount.bind(this));
 
   this.acctsSlice = model.api.viewAccounts(false);
@@ -143,24 +149,26 @@ FolderPickerCard.prototype = {
   },
 
   showAccounts: function() {
-    this.foldersContainer.style.transform = 'translateY(0)';
-    this.accountsContainer.style.transform = 'translateY(0)';
+    this.fldAcctScrollInner.style.height = (this.currentAccountContainerHeight +
+                   this.foldersContainer.getBoundingClientRect().height) + 'px';
+    this.fldAcctContainer.style.transform = 'translateY(0)';
 
     removeClass(this.foldersHeader, 'closed');
   },
 
   hideAccounts: function() {
-    var transformValue = 'translateY(-' +
+    var foldersHeight = this.foldersContainer.getBoundingClientRect().height;
+    this.fldAcctScrollInner.style.height = foldersHeight + 'px';
+    this.fldAcctContainer.style.transform = 'translateY(-' +
                          this.currentAccountContainerHeight +
                          'px)';
-    this.foldersContainer.style.transform = transformValue;
-    this.accountsContainer.style.transform = transformValue;
+
     addClass(this.foldersHeader, 'closed');
   },
 
   onAccountsSplice: function(index, howMany, addedItems,
                              requested, moreExpected) {
-    var accountsContainer = this.accountsContainer;
+    var accountListContainer = this.accountListContainer;
 
     var accountCount = this.acctsSlice.items.length +
                        addedItems.length - howMany;
@@ -174,29 +182,25 @@ FolderPickerCard.prototype = {
     if (howMany) {
       for (var i = index + howMany - 1; i >= index; i--) {
         account = this.acctsSlice.items[i];
-        accountsContainer.removeChild(account.element);
+        accountListContainer.removeChild(account.element);
       }
     }
 
-    var insertBuddy = (index >= accountsContainer.childElementCount) ?
-                        null : accountsContainer.children[index];
+    var insertBuddy = (index >= accountListContainer.childElementCount) ?
+                        null : accountListContainer.children[index];
 
     addedItems.forEach(function(account) {
       var accountNode = account.element =
         fldAccountItemNode.cloneNode(true);
       accountNode.account = account;
       this.updateAccountDom(account, true);
-      accountsContainer.insertBefore(accountNode, insertBuddy);
+      accountListContainer.insertBefore(accountNode, insertBuddy);
     }.bind(this));
 
-    this.currentAccountContainerHeight = this.accountsContainer
+    removeClass(this.accountListContainer, 'collapsed');
+    this.currentAccountContainerHeight = this.accountListContainer
                                          .getBoundingClientRect().height;
-    var transformValue = 'translateY(-' +
-                         this.currentAccountContainerHeight +
-                         'px)';
-    this.accountsContainer.style.transform = transformValue;
-
-    this.foldersContainer.style.transform = transformValue;
+    this.hideAccounts();
   },
 
   onAccountsChange: function(account) {

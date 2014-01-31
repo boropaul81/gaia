@@ -31,7 +31,7 @@
 }
 
 
-.card-folder-picker .slot-machine {
+.card-folder-picker .fld-acct-scrollouter {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
@@ -39,12 +39,15 @@
   background-color: #e7e7e7;
 }
 
-.card-folder-picker.one-account .slot-machine {
+.card-folder-picker.one-account .fld-acct-scrollouter {
   height: calc(100% - 14rem);
 }
 
-.fld-acct-list-container,
-.fld-folders-container {
+.fld-acct-scrollinner {
+  overflow: hidden;
+}
+
+.fld-acct-container {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
@@ -54,15 +57,23 @@
   transition-delay: 0;
 }
 
-.fld-acct-list-container {
+.fld-accountlist-container {
   background: #e7e7e7;
 }
+
+/*.fld-accountlist-container.closed {
+  display: none;
+}*/
 
 .fld-folders-container {
   border-top: 1px solid white;
   background-color: #f4f4f4;
 }
 
+/*.fld-folders-container.closed {
+  transform: translateY(0);
+}
+*/
 .card-folder-picker.one-account .fld-folders-container {
   padding-top: 0;
 }
